@@ -655,47 +655,49 @@ export default function Chat() {
 
   return (
     <div className="flex flex-col lg:flex-row h-full w-full relative">
-      {/* Mobile Menu Button - Fixed top */}
+      {/* Mobile Menu Button - Fixed top with safe area */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="lg:hidden fixed top-3 right-3 z-[60] p-2 bg-black/20 hover:bg-black/30 active:bg-black/40 backdrop-blur-lg rounded-xl text-white shadow-lg ring-1 ring-white/10 transition-all"
+        className="lg:hidden fixed top-safe right-3 z-[60] p-2.5 m-3 bg-black/20 hover:bg-black/30 active:bg-black/40 backdrop-blur-lg rounded-xl text-white shadow-lg ring-1 ring-white/10 transition-all"
       >
         <MessageCircle className="w-5 h-5" />
       </button>
 
-      {/* Mobile Bottom Sheet Sidebar */}
+      {/* Mobile Bottom Sheet Sidebar - With safe area and better gestures */}
       <div 
         className={`
-          lg:hidden fixed inset-x-0 bottom-0 z-50 transition-transform duration-300 ease-in-out
+          lg:hidden fixed inset-x-0 bottom-0 z-50 transition-all duration-300 ease-in-out
           ${isSidebarOpen ? 'translate-y-0' : 'translate-y-full'}
-          bg-black/90 backdrop-blur-2xl border-t border-white/10 rounded-t-3xl
-          max-h-[80vh] overflow-hidden flex flex-col
+          bg-black/95 backdrop-blur-2xl border-t border-white/10 
+          rounded-t-[24px] pb-safe-or-2
+          max-h-[85vh] overflow-hidden flex flex-col
+          shadow-[0_-8px_32px_rgba(0,0,0,0.5)]
         `}
       >
-        {/* Bottom sheet pull indicator */}
-        <div className="p-3 flex justify-center">
-          <div className="w-12 h-1 bg-white/20 rounded-full"></div>
+        {/* Premium pull indicator */}
+        <div className="p-3 flex justify-center touch-none">
+          <div className="w-12 h-1.5 bg-white/20 rounded-full"></div>
         </div>
         
-        {/* Mobile sidebar content */}
-        <div className="p-3 flex flex-col gap-3 overflow-y-auto">
+        {/* Mobile sidebar content with better touch targets */}
+        <div className="p-4 flex flex-col gap-3 overflow-y-auto">
           <button
             onClick={createNewChat}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-white rounded-xl transition-all shadow-lg shadow-emerald-500/20 ring-1 ring-white/20"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-white rounded-xl transition-all shadow-lg shadow-emerald-500/20 ring-1 ring-white/20 touch-none"
           >
             <PlusCircle className="w-5 h-5" />
             New Chat
           </button>
           
-          <div className="flex-1 space-y-2">
+          <div className="flex-1 space-y-2.5">
             {sessions.map(session => (
-              <div key={session.id} className="flex items-center gap-2 group">
+              <div key={session.id} className="flex items-center gap-2 group touch-none">
                 <button
                   onClick={() => {
                     switchSession(session.id);
                     setIsSidebarOpen(false);
                   }}
-                  className={`flex-1 flex flex-col items-start gap-1 px-4 py-3 rounded-xl transition-all ${
+                  className={`flex-1 flex flex-col items-start gap-1.5 px-4 py-3.5 rounded-xl transition-all ${
                     session.id === currentSessionId
                       ? 'bg-emerald-500/20 text-white ring-1 ring-emerald-500/30'
                       : 'text-white/70 hover:bg-white/5 active:bg-white/10'
@@ -716,7 +718,7 @@ export default function Chat() {
                 </button>
                 <button
                   onClick={() => deleteSession(session.id)}
-                  className="p-2 text-white/70 hover:text-white hover:bg-red-500/20 active:bg-red-500/30 rounded-lg transition-all"
+                  className="p-3 text-white/70 hover:text-white hover:bg-red-500/20 active:bg-red-500/30 rounded-xl transition-all"
                   title="Delete chat"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -775,9 +777,9 @@ export default function Chat() {
 
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col h-full w-full relative">
-        {/* Header */}
-        <div className="flex justify-between items-center p-3 border-b border-white/10 bg-black/20 backdrop-blur-xl shrink-0">
-          <div className="flex items-center gap-2">
+        {/* Header - With safe area */}
+        <div className="flex justify-between items-center p-3 pt-safe border-b border-white/10 bg-black/20 backdrop-blur-xl shrink-0">
+          <div className="flex items-center gap-2 ml-14 lg:ml-0">
             <h2 className="text-white text-base sm:text-lg font-semibold [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
               🇵🇰 Pakistan AI
             </h2>
@@ -794,8 +796,8 @@ export default function Chat() {
           </button>
         </div>
 
-        {/* Messages area */}
-        <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 scroll-smooth scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent min-h-0 pb-20 lg:pb-4">
+        {/* Messages area - Better mobile spacing */}
+        <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 scroll-smooth scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent min-h-0 pb-36 lg:pb-4">
           {messages.length === 0 && (
             <div className="text-center text-white/90 mt-6 sm:mt-8">
               <p className="mb-3 text-lg sm:text-xl font-medium [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
@@ -885,17 +887,17 @@ export default function Chat() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input area - Fixed on mobile */}
+        {/* Input area - Fixed on mobile with safe area */}
         <form 
           onSubmit={handleSubmit} 
-          className="lg:relative fixed bottom-0 left-0 right-0 p-3 border-t border-white/10 bg-black/90 backdrop-blur-xl lg:backdrop-blur-sm lg:bg-black/20"
+          className="lg:relative fixed bottom-0 left-0 right-0 p-3 pb-safe-or-3 border-t border-white/10 bg-black/95 lg:bg-black/20 backdrop-blur-xl lg:backdrop-blur-sm shadow-[0_-8px_32px_rgba(0,0,0,0.2)]"
         >
           <div className="flex items-center gap-2 max-w-5xl mx-auto">
             <div className="flex gap-1.5">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="p-2 text-white/80 hover:text-white hover:bg-white/10 active:bg-white/20 rounded-xl transition-all ring-1 ring-white/10"
+                className="p-2.5 text-white/80 hover:text-white hover:bg-white/10 active:bg-white/20 rounded-xl transition-all ring-1 ring-white/10"
                 title="Upload"
               >
                 <FileUp className="w-5 h-5" />
@@ -904,7 +906,7 @@ export default function Chat() {
                 type="button"
                 onClick={handleSearch}
                 disabled={isLoading}
-                className={`p-2 text-white/80 hover:text-white transition-all rounded-xl ring-1 ring-white/10 ${
+                className={`p-2.5 text-white/80 hover:text-white transition-all rounded-xl ring-1 ring-white/10 ${
                   isSearching 
                     ? 'bg-emerald-500/20 text-emerald-400 ring-emerald-500/30' 
                     : 'hover:bg-white/10 active:bg-white/20'
@@ -925,7 +927,7 @@ export default function Chat() {
                   ? "Search..." 
                   : "Type message..."
               }
-              className="flex-1 bg-black/20 text-white placeholder-white/50 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ring-1 ring-white/10 text-sm sm:text-base transition-all"
+              className="flex-1 bg-black/20 text-white placeholder-white/50 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ring-1 ring-white/10 text-sm sm:text-base transition-all"
               disabled={isLoading}
             />
             {error ? (
@@ -933,7 +935,7 @@ export default function Chat() {
                 type="button"
                 onClick={handleRetry}
                 disabled={isLoading || retryCount >= 3}
-                className="p-2 text-white/80 hover:text-white hover:bg-white/10 active:bg-white/20 rounded-xl transition-all ring-1 ring-white/10 disabled:opacity-50"
+                className="p-2.5 text-white/80 hover:text-white hover:bg-white/10 active:bg-white/20 rounded-xl transition-all ring-1 ring-white/10 disabled:opacity-50"
                 title="Retry"
               >
                 <RefreshCcw className="w-5 h-5" />
@@ -942,7 +944,7 @@ export default function Chat() {
               <button
                 type="submit"
                 disabled={isLoading || !input.trim()}
-                className="p-2 text-white/80 hover:text-white hover:bg-emerald-500/20 active:bg-emerald-500/30 rounded-xl transition-all ring-1 ring-white/10 disabled:opacity-50 disabled:hover:bg-transparent"
+                className="p-2.5 text-white/80 hover:text-white hover:bg-emerald-500/20 active:bg-emerald-500/30 rounded-xl transition-all ring-1 ring-white/10 disabled:opacity-50 disabled:hover:bg-transparent"
               >
                 <Send className="w-5 h-5" />
               </button>
@@ -952,13 +954,13 @@ export default function Chat() {
           {(pendingFile || error) && (
             <div className="mt-2 text-xs flex items-center gap-3 max-w-5xl mx-auto">
               {pendingFile && (
-                <span className="text-emerald-400/90 flex items-center gap-1.5 bg-emerald-500/10 px-2 py-1 rounded-lg ring-1 ring-emerald-500/30">
+                <span className="text-emerald-400/90 flex items-center gap-1.5 bg-emerald-500/10 px-2.5 py-1.5 rounded-lg ring-1 ring-emerald-500/30">
                   <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
                   File ready
                 </span>
               )}
               {error && (
-                <span className="text-red-400/90 flex items-center gap-1.5 bg-red-500/10 px-2 py-1 rounded-lg ring-1 ring-red-500/30">
+                <span className="text-red-400/90 flex items-center gap-1.5 bg-red-500/10 px-2.5 py-1.5 rounded-lg ring-1 ring-red-500/30">
                   <AlertCircle className="w-4 h-4" />
                   {error}
                 </span>
@@ -974,10 +976,10 @@ export default function Chat() {
           />
         </form>
 
-        {/* Mobile backdrop */}
+        {/* Mobile backdrop with better blur */}
         {isSidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-md z-40 lg:hidden"
+            className="fixed inset-0 bg-black/70 backdrop-blur-md z-40 lg:hidden"
             onClick={() => setIsSidebarOpen(false)}
           />
         )}
