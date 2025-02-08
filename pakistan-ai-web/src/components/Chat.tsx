@@ -76,30 +76,37 @@ export default function Chat() {
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
+    const fullPrompt = `${SYSTEM_PROMPT}\n\nUser: ${content}\nAssistant:`;
+    
     const payload = {
       contents: [{
         parts: [
-          { text: SYSTEM_PROMPT },
-          { text: content }
+          { text: fullPrompt }
         ]
       }]
     };
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(`API Error: ${errorData.error?.message || response.statusText}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('API Error:', errorData);
+        throw new Error(`API Error: ${errorData.error?.message || response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data.candidates[0].content.parts[0].text;
+    } catch (error) {
+      console.error('API Call Error:', error);
+      throw error;
     }
-
-    const data = await response.json();
-    return data.candidates[0].content.parts[0].text;
   };
 
   const handleSubmit = async (e?: React.FormEvent, retryContent?: string) => {
