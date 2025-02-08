@@ -658,7 +658,7 @@ export default function Chat() {
       {/* Mobile Menu Button - Premium styling */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="lg:hidden fixed top-4 left-4 z-[60] p-2.5 bg-black/20 hover:bg-black/30 active:bg-black/40 backdrop-blur-lg rounded-xl text-white shadow-lg ring-1 ring-white/10 transition-all"
+        className="lg:hidden fixed top-3 left-3 z-[60] p-2 bg-black/20 hover:bg-black/30 active:bg-black/40 backdrop-blur-lg rounded-xl text-white shadow-lg ring-1 ring-white/10 transition-all"
       >
         <MessageCircle className="w-5 h-5" />
       </button>
@@ -667,10 +667,10 @@ export default function Chat() {
       <div className={`${
         isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
       } lg:translate-x-0 fixed lg:relative w-72 h-full z-50 transition-transform duration-300 ease-in-out
-      bg-black/40 backdrop-blur-xl lg:backdrop-blur-2xl border-r border-white/10 p-4 flex flex-col gap-4`}>
+      bg-black/40 backdrop-blur-xl lg:backdrop-blur-2xl border-r border-white/10 flex flex-col gap-3 p-3`}>
         <button
           onClick={createNewChat}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-white rounded-xl transition-all shadow-lg shadow-emerald-500/20 ring-1 ring-white/20"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-white rounded-xl transition-all shadow-lg shadow-emerald-500/20 ring-1 ring-white/20"
         >
           <PlusCircle className="w-5 h-5" />
           New Chat
@@ -684,7 +684,7 @@ export default function Chat() {
                   switchSession(session.id);
                   setIsSidebarOpen(false);
                 }}
-                className={`flex-1 flex flex-col items-start gap-1 px-4 py-3 rounded-xl transition-all ${
+                className={`flex-1 flex flex-col items-start gap-1 px-3 py-2.5 rounded-xl transition-all ${
                   session.id === currentSessionId
                     ? 'bg-emerald-500/20 text-white ring-1 ring-emerald-500/30'
                     : 'text-white/70 hover:bg-white/5 active:bg-white/10'
@@ -718,9 +718,9 @@ export default function Chat() {
       {/* Main Chat Area - Premium container */}
       <div className="flex-1 flex flex-col h-full w-full relative">
         {/* Header - Glass effect */}
-        <div className="flex justify-between items-center p-3 sm:p-4 border-b border-white/10 bg-black/20 backdrop-blur-xl shrink-0">
-          <div className="flex items-center gap-2 ml-14 lg:ml-0">
-            <h2 className="text-white text-lg font-semibold [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
+        <div className="flex justify-between items-center p-3 border-b border-white/10 bg-black/20 backdrop-blur-xl shrink-0">
+          <div className="flex items-center gap-2 ml-12 lg:ml-0">
+            <h2 className="text-white text-base sm:text-lg font-semibold [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
               🇵🇰 Pakistan AI
             </h2>
             <span className="hidden sm:inline text-xs text-emerald-400/90 font-medium">
@@ -737,13 +737,13 @@ export default function Chat() {
         </div>
 
         {/* Messages area - Premium scrolling */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6 scroll-smooth scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent min-h-0">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 scroll-smooth scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent min-h-0">
           {messages.length === 0 && (
-            <div className="text-center text-white/90 mt-8 sm:mt-12">
-              <p className="mb-3 text-xl font-medium [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
+            <div className="text-center text-white/90 mt-6 sm:mt-8">
+              <p className="mb-3 text-lg sm:text-xl font-medium [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
                 السَّلامُ عَلَيْكُم 👋
               </p>
-              <p className="text-lg mb-6">How may I assist you today?</p>
+              <p className="text-base sm:text-lg mb-6">How may I assist you today?</p>
               <div className="max-w-sm mx-auto text-sm bg-black/20 backdrop-blur-lg rounded-xl p-4 shadow-xl ring-1 ring-white/10">
                 <p className="mb-2 text-emerald-400 font-medium">You can:</p>
                 <ul className="space-y-2 text-white/80">
@@ -763,6 +763,8 @@ export default function Chat() {
               </div>
             </div>
           )}
+          
+          {/* Messages */}
           <AnimatePresence>
             {messages.map((message, index) => (
               <motion.div
@@ -826,13 +828,13 @@ export default function Chat() {
         </div>
 
         {/* Input area - Premium controls */}
-        <form onSubmit={handleSubmit} className="p-4 border-t border-white/10 bg-black/20 backdrop-blur-xl shrink-0">
+        <form onSubmit={handleSubmit} className="p-3 border-t border-white/10 bg-black/20 backdrop-blur-xl shrink-0">
           <div className="flex items-center gap-2">
             <div className="flex gap-1.5">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="p-2.5 text-white/80 hover:text-white hover:bg-white/10 active:bg-white/20 rounded-xl transition-all ring-1 ring-white/10"
+                className="p-2 text-white/80 hover:text-white hover:bg-white/10 active:bg-white/20 rounded-xl transition-all ring-1 ring-white/10"
                 title="Upload"
               >
                 <FileUp className="w-5 h-5" />
@@ -841,7 +843,7 @@ export default function Chat() {
                 type="button"
                 onClick={handleSearch}
                 disabled={isLoading}
-                className={`p-2.5 text-white/80 hover:text-white transition-all rounded-xl ring-1 ring-white/10 ${
+                className={`p-2 text-white/80 hover:text-white transition-all rounded-xl ring-1 ring-white/10 ${
                   isSearching 
                     ? 'bg-emerald-500/20 text-emerald-400 ring-emerald-500/30' 
                     : 'hover:bg-white/10 active:bg-white/20'
@@ -862,7 +864,7 @@ export default function Chat() {
                   ? "Search..." 
                   : "Type message..."
               }
-              className="flex-1 bg-black/20 text-white placeholder-white/50 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ring-1 ring-white/10 text-sm sm:text-base transition-all"
+              className="flex-1 bg-black/20 text-white placeholder-white/50 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ring-1 ring-white/10 text-sm sm:text-base transition-all"
               disabled={isLoading}
             />
             {error ? (
@@ -870,7 +872,7 @@ export default function Chat() {
                 type="button"
                 onClick={handleRetry}
                 disabled={isLoading || retryCount >= 3}
-                className="p-2.5 text-white/80 hover:text-white hover:bg-white/10 active:bg-white/20 rounded-xl transition-all ring-1 ring-white/10 disabled:opacity-50"
+                className="p-2 text-white/80 hover:text-white hover:bg-white/10 active:bg-white/20 rounded-xl transition-all ring-1 ring-white/10 disabled:opacity-50"
                 title="Retry"
               >
                 <RefreshCcw className="w-5 h-5" />
@@ -879,7 +881,7 @@ export default function Chat() {
               <button
                 type="submit"
                 disabled={isLoading || !input.trim()}
-                className="p-2.5 text-white/80 hover:text-white hover:bg-emerald-500/20 active:bg-emerald-500/30 rounded-xl transition-all ring-1 ring-white/10 disabled:opacity-50 disabled:hover:bg-transparent"
+                className="p-2 text-white/80 hover:text-white hover:bg-emerald-500/20 active:bg-emerald-500/30 rounded-xl transition-all ring-1 ring-white/10 disabled:opacity-50 disabled:hover:bg-transparent"
               >
                 <Send className="w-5 h-5" />
               </button>

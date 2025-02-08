@@ -50,22 +50,22 @@ export default function Home() {
       />
       
       {/* Hero Section - Premium & minimal */}
-      <div className="relative shrink-0">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+      <div className="relative shrink-0 py-4 sm:py-6 lg:py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-2 sm:space-y-3">
             <motion.div
               {...fadeInUp}
               transition={{ ...fadeInUp.transition, delay: 0.3 }}
               className="inline-block"
             >
-              <h1 className="text-3xl sm:text-5xl font-bold text-white [text-shadow:0_2px_10px_rgba(0,0,0,0.1)]">
+              <h1 className="text-2xl sm:text-3xl lg:text-5xl font-bold text-white [text-shadow:0_2px_10px_rgba(0,0,0,0.1)]">
                 Pakistan AI <span className="bg-gradient-to-r from-emerald-400 to-emerald-300 text-transparent bg-clip-text">Assistant</span>
               </h1>
             </motion.div>
             <motion.p 
               {...fadeInUp}
               transition={{ ...fadeInUp.transition, delay: 0.4 }}
-              className="text-sm sm:text-base text-emerald-50/80 font-medium [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]"
+              className="text-sm sm:text-base text-emerald-50/80 font-medium [text-shadow:0_1px_2px_rgba(0,0,0,0.1)] max-w-xl mx-auto"
             >
               Experience the future of AI conversation with a Pakistani touch
             </motion.p>
@@ -77,10 +77,12 @@ export default function Home() {
       <motion.div 
         {...fadeInUp}
         transition={{ ...fadeInUp.transition, delay: 0.5 }}
-        className="flex-1 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 w-full min-h-0"
+        className="flex-1 w-full min-h-0 px-2 sm:px-4 lg:px-6 pb-2 sm:pb-4 lg:pb-6"
       >
-        <div className="relative rounded-2xl backdrop-blur-sm ring-1 ring-white/10 shadow-[0_0_1px_1px_rgba(0,0,0,0.1)] h-full">
-          <Chat />
+        <div className="max-w-5xl mx-auto h-full">
+          <div className="relative rounded-2xl backdrop-blur-sm ring-1 ring-white/10 shadow-[0_0_1px_1px_rgba(0,0,0,0.1)] h-full overflow-hidden">
+            <Chat />
+          </div>
         </div>
       </motion.div>
 
@@ -89,9 +91,9 @@ export default function Home() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8, delay: 0.6 }}
-        className="text-center py-3 sm:py-4 shrink-0"
+        className="text-center py-2 sm:py-3 shrink-0"
       >
-        <p className="text-sm font-medium bg-gradient-to-r from-emerald-100/40 to-emerald-50/40 text-transparent bg-clip-text">
+        <p className="text-xs sm:text-sm font-medium bg-gradient-to-r from-emerald-100/40 to-emerald-50/40 text-transparent bg-clip-text">
           Built with ❤️ for Pakistan
         </p>
       </motion.footer>
