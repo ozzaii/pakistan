@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, FileUp, Search, Loader2, AlertCircle, RefreshCcw, Trash2, Download, PlusCircle, MessageCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -146,7 +146,17 @@ export default function Chat() {
   const [sessions, setSessions] = useState<ChatSession[]>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('chatSessions');
-      return saved ? JSON.parse(saved) : [];
+      const parsed = saved ? JSON.parse(saved) : [];
+      // Ensure dates are properly parsed
+      return parsed.map((session: ChatSession) => ({
+        ...session,
+        createdAt: new Date(session.createdAt),
+        lastUpdated: new Date(session.lastUpdated),
+        messages: session.messages.map(msg => ({
+          ...msg,
+          timestamp: msg.timestamp ? new Date(msg.timestamp) : undefined
+        }))
+      }));
     }
     return [];
   });
@@ -173,30 +183,25 @@ export default function Chat() {
 
   const [messages, setMessages] = useState<Message[]>([]);
 
-  useEffect(() => {
-    if (sessions.length > 0) {
-      localStorage.setItem('chatSessions', JSON.stringify(sessions));
-    }
-  }, [sessions]);
+  // Memoize current session to prevent unnecessary re-renders
+  const currentSession = useMemo(() => 
+    sessions.find(s => s.id === currentSessionId),
+    [sessions, currentSessionId]
+  );
 
-  useEffect(() => {
-    const currentSession = sessions.find(s => s.id === currentSessionId);
-    if (currentSession) {
-      setMessages(currentSession.messages);
-    }
-  }, [currentSessionId, sessions]);
-
-  useEffect(() => {
+  // Batch updates for messages
+  const updateMessages = useCallback((newMessages: Message[]) => {
+    setMessages(newMessages);
     setSessions(prev => prev.map(session => {
       if (session.id === currentSessionId) {
-        const context = generateChatContext(messages);
-        const title = messages[0]?.content 
-          ? generateChatTitle(messages[0].content)
+        const context = generateChatContext(newMessages);
+        const title = newMessages[0]?.content 
+          ? generateChatTitle(newMessages[0].content)
           : 'New Chat';
         
         return {
           ...session,
-          messages,
+          messages: newMessages,
           lastUpdated: new Date(),
           title,
           context
@@ -204,7 +209,25 @@ export default function Chat() {
       }
       return session;
     }));
-  }, [messages, currentSessionId]);
+  }, [currentSessionId]);
+
+  // Debounced localStorage update
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (sessions.length > 0) {
+        localStorage.setItem('chatSessions', JSON.stringify(sessions));
+      }
+    }, 1000); // Debounce for 1 second
+
+    return () => clearTimeout(timeoutId);
+  }, [sessions]);
+
+  // Update messages only when switching sessions
+  useEffect(() => {
+    if (currentSession) {
+      setMessages(currentSession.messages);
+    }
+  }, [currentSession?.id]); // Only depend on session ID change
 
   const createNewChat = () => {
     const newId = crypto.randomUUID();
@@ -505,7 +528,6 @@ export default function Chat() {
     const content = retryContent || input;
     if (!content.trim()) return;
 
-    // If we're in search mode, handle it separately
     if (isSearching) {
       await handleSearch();
       return;
@@ -524,7 +546,7 @@ export default function Chat() {
     };
 
     if (!retryContent) {
-      setMessages(prev => [...prev, userMessage]);
+      updateMessages([...messages, userMessage]);
       setInput('');
     }
     
@@ -532,35 +554,30 @@ export default function Chat() {
     setError(null);
 
     try {
-      // Special handling for CSV files
+      let response: string;
       if (pendingFile?.type === 'text/csv' && pendingFile.textContent) {
         const csvPrompt = `Here is a CSV file named "${pendingFile.name}". The user wants to: ${content}\n\nCSV Content:\n${pendingFile.textContent}\n\nPlease provide a detailed analysis and follow the user's instructions regarding the CSV data.`;
-        const response = await callGeminiAPI(csvPrompt);
-        
-        setMessages(prev => [...prev, {
-          role: 'assistant',
-          content: response,
-          timestamp: new Date()
-        }]);
+        response = await callGeminiAPI(csvPrompt);
       } else {
-        const response = await callGeminiAPI(
+        response = await callGeminiAPI(
           content,
           pendingFile?.data,
           pendingFile?.type
         );
-        
-        const generatedFile = await generateDocument(response);
-        
-        setMessages(prev => [...prev, {
-          role: 'assistant',
-          content: response,
-          timestamp: new Date(),
-          ...(generatedFile && { generatedFile })
-        }]);
-        
-        if (generatedFile) {
-          toast.success('Document generated! Click the download button to save it.');
-        }
+      }
+      
+      const generatedFile = await generateDocument(response);
+      const assistantMessage: Message = {
+        role: 'assistant',
+        content: response,
+        timestamp: new Date(),
+        ...(generatedFile && { generatedFile })
+      };
+      
+      updateMessages([...messages, userMessage, assistantMessage]);
+      
+      if (generatedFile) {
+        toast.success('Document generated! Click the download button to save it.');
       }
       
       setRetryCount(0);
@@ -571,7 +588,7 @@ export default function Chat() {
       toast.error(errorMessage);
       setError(errorMessage);
 
-      setMessages(prev => [...prev, {
+      updateMessages([...messages, userMessage, {
         role: 'assistant',
         content: errorMessage,
         timestamp: new Date(),
@@ -598,8 +615,8 @@ export default function Chat() {
         
         const response = await callGeminiAPI(searchPrompt);
         
-        setMessages(prev => [
-          ...prev,
+        updateMessages([
+          ...messages,
           {
             role: 'user',
             content: `🔍 Web Search: ${input}`,
