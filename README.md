@@ -2,7 +2,7 @@
 
 A beautiful, modern AI chat platform built with Next.js and Google AI, featuring a premium UI with Pakistani cultural elements.
 
-🔗 **[Live Demo](https://ozzaii.github.io/pakistan)** 
+🔗 **[Live Demo](https://ozzaii.github.io/pakistan)**
 
 ## ✨ Features
 
