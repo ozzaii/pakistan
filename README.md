@@ -1,10 +1,8 @@
 # 🌟 PakistanAI - Next Generation AI Chat Platform
 
-A beautiful, modern AI chat platform built with Next.js, FastAPI, and Google AI, featuring a premium UI with Pakistani cultural elements.
+A beautiful, modern AI chat platform built with Next.js and Google AI, featuring a premium UI with Pakistani cultural elements.
 
-🔗 **[Live Demo](https://yourusername.github.io/pakistan)** 
-
-![PakistanAI Screenshot](pakistan-ai-web/public/screenshot.png)
+🔗 **[Live Demo](https://ozzaii.github.io/pakistan)** 
 
 ## ✨ Features
 
@@ -26,79 +24,42 @@ A beautiful, modern AI chat platform built with Next.js, FastAPI, and Google AI,
 - DaisyUI
 - Heroicons
 
-### Backend
-- FastAPI
-- Google AI Platform
-- Python 3.9+
-- Vertex AI
+### AI Integration
+- Google Gemini AI
+- Cultural context awareness
+- Real-time responses
 
 ## 🚀 Quick Start
 
-### Development
-
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/pakistan.git
+git clone https://github.com/ozzaii/pakistan.git
 cd pakistan
 ```
 
-2. Frontend setup:
+2. Install dependencies and start the development server:
 ```bash
 cd pakistan-ai-web
 npm install
 npm run dev
 ```
 
-3. Backend setup:
+3. Set up environment variables:
 ```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # On Windows: .\venv\Scripts\activate
-pip install -r requirements.txt
-python main.py
+cp .env.example .env.local
+# Add your Gemini API key to .env.local:
+NEXT_PUBLIC_GEMINI_API_KEY=your-key-here
 ```
 
-### Environment Variables
+## 🌐 Live Demo
 
-Copy `.env.example` to `.env` and update the values:
+Visit the live demo at: [https://ozzaii.github.io/pakistan](https://ozzaii.github.io/pakistan)
 
-```bash
-cp .env.example .env
-# Edit .env with your configuration
-```
+## 🔒 Security Features
 
-Required variables:
-- `GOOGLE_CLOUD_PROJECT`
-- `GOOGLE_CLOUD_LOCATION`
-- `GOOGLE_APPLICATION_CREDENTIALS`
-- `NEXT_PUBLIC_API_URL`
-- `API_KEY`
-
-## 🌐 Deployment
-
-### GitHub Pages (Frontend)
-
-The frontend is automatically deployed to GitHub Pages when pushing to the main branch.
-
-1. Update repository settings:
-   - Go to Settings > Pages
-   - Set source to "GitHub Actions"
-
-2. Push to main branch:
-```bash
-git push origin main
-```
-
-### Backend Deployment
-
-Follow the [Deployment Guide](DEPLOYMENT.md) for backend deployment options.
-
-## 🔒 Security
-
+- API key protection
 - Rate limiting
-- API key authentication
 - Security headers
-- CORS configuration
 - Error handling
 
 ## 📝 License
@@ -111,6 +72,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 🙏 Acknowledgments
 
-- Thanks to the Next.js and FastAPI teams
+- Thanks to the Next.js team
 - Google AI Platform
 - The open-source community 
