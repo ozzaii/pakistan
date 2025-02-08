@@ -40,10 +40,10 @@ export default function Chat() {
     if (!lastUserMessage || lastUserMessage.role !== 'user') return;
     
     setRetryCount(prev => prev + 1);
-    await handleSubmit(null, lastUserMessage.content);
+    await handleSubmit(undefined, lastUserMessage.content);
   };
 
-  const handleSubmit = async (e?: React.FormEvent, retryContent?: string) => {
+  const handleSubmit = async (e?: React.FormEvent | undefined, retryContent?: string) => {
     if (e) e.preventDefault();
     
     const content = retryContent || input;
