@@ -715,7 +715,7 @@ export default function Chat() {
       </div>
 
       {/* Main Chat Area - Cleaner spacing */}
-      <div className="flex-1 flex flex-col h-full w-full relative">
+      <div className="flex-1 flex flex-col h-full w-full">
         {/* Header - More minimal */}
         <div className="flex justify-between items-center h-12 px-4 bg-black/20 backdrop-blur-xl shrink-0 border-b border-white/10">
           <h2 className="text-white text-base font-medium">🇵🇰 Pakistan AI</h2>
@@ -729,7 +729,7 @@ export default function Chat() {
         </div>
 
         {/* Messages area - Clean spacing */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 scroll-smooth min-h-0 pb-32 lg:pb-4">
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 scroll-smooth">
           {messages.length === 0 && (
             <div className="text-center text-white/90 mt-6 sm:mt-8">
               <p className="mb-3 text-lg sm:text-xl font-medium [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
@@ -819,94 +819,96 @@ export default function Chat() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input area - Cleaner */}
-        <form 
-          onSubmit={handleSubmit} 
-          className="lg:relative fixed bottom-0 left-0 right-0 p-4 border-t border-white/10 bg-black/95 lg:bg-black/20 backdrop-blur-xl lg:backdrop-blur-sm"
-        >
-          <div className="flex items-center gap-2 max-w-3xl mx-auto">
-            <div className="flex gap-1">
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all"
-                title="Upload file"
-              >
-                <FileUp className="w-5 h-5" />
-              </button>
-              <button
-                type="button"
-                onClick={handleSearch}
+        {/* Input area - Fixed bottom */}
+        <div className="shrink-0 w-full border-t border-white/10 bg-black/95 lg:bg-black/20 backdrop-blur-xl lg:backdrop-blur-sm">
+          <form 
+            onSubmit={handleSubmit} 
+            className="p-4 max-w-3xl mx-auto"
+          >
+            <div className="flex items-center gap-2">
+              <div className="flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+                  title="Upload file"
+                >
+                  <FileUp className="w-5 h-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSearch}
+                  disabled={isLoading}
+                  className={`p-2 text-white/70 hover:text-white rounded-lg transition-all ${
+                    isSearching 
+                      ? 'bg-emerald-500/20 text-emerald-400' 
+                      : 'hover:bg-white/10'
+                  }`}
+                  title={isSearching ? "Search" : "Web Search"}
+                >
+                  <Search className="w-5 h-5" />
+                </button>
+              </div>
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder={
+                  pendingFile 
+                    ? `Instructions for ${pendingFile.name}...`
+                    : isSearching 
+                    ? "Search..." 
+                    : "Type message..."
+                }
+                className="flex-1 bg-black/20 text-white placeholder-white/50 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 text-sm transition-all"
                 disabled={isLoading}
-                className={`p-2 text-white/70 hover:text-white rounded-lg transition-all ${
-                  isSearching 
-                    ? 'bg-emerald-500/20 text-emerald-400' 
-                    : 'hover:bg-white/10'
-                }`}
-                title={isSearching ? "Search" : "Web Search"}
-              >
-                <Search className="w-5 h-5" />
-              </button>
+              />
+              {error ? (
+                <button
+                  type="button"
+                  onClick={handleRetry}
+                  disabled={isLoading || retryCount >= 3}
+                  className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all disabled:opacity-50"
+                  title="Retry"
+                >
+                  <RefreshCcw className="w-5 h-5" />
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={isLoading || !input.trim()}
+                  className="p-2 text-white/70 hover:text-white hover:bg-emerald-500/20 rounded-lg transition-all disabled:opacity-50"
+                >
+                  <Send className="w-5 h-5" />
+                </button>
+              )}
             </div>
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder={
-                pendingFile 
-                  ? `Instructions for ${pendingFile.name}...`
-                  : isSearching 
-                  ? "Search..." 
-                  : "Type message..."
-              }
-              className="flex-1 bg-black/20 text-white placeholder-white/50 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 text-sm transition-all"
-              disabled={isLoading}
-            />
-            {error ? (
-              <button
-                type="button"
-                onClick={handleRetry}
-                disabled={isLoading || retryCount >= 3}
-                className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all disabled:opacity-50"
-                title="Retry"
-              >
-                <RefreshCcw className="w-5 h-5" />
-              </button>
-            ) : (
-              <button
-                type="submit"
-                disabled={isLoading || !input.trim()}
-                className="p-2 text-white/70 hover:text-white hover:bg-emerald-500/20 rounded-lg transition-all disabled:opacity-50"
-              >
-                <Send className="w-5 h-5" />
-              </button>
+            {/* Error and file indicators */}
+            {(pendingFile || error) && (
+              <div className="mt-2 text-xs flex items-center gap-2 max-w-3xl mx-auto">
+                {pendingFile && (
+                  <span className="text-emerald-400 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+                    File ready
+                  </span>
+                )}
+                {error && (
+                  <span className="text-red-400 flex items-center gap-1">
+                    <AlertCircle className="w-4 h-4" />
+                    {error}
+                  </span>
+                )}
+              </div>
             )}
-          </div>
-          {/* Error and file indicators */}
-          {(pendingFile || error) && (
-            <div className="mt-2 text-xs flex items-center gap-2 max-w-3xl mx-auto">
-              {pendingFile && (
-                <span className="text-emerald-400 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
-                  File ready
-                </span>
-              )}
-              {error && (
-                <span className="text-red-400 flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
-                  {error}
-                </span>
-              )}
-            </div>
-          )}
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileUpload}
-            accept=".pdf,.doc,.docx,.txt,.csv,image/*,application/json"
-            className="hidden"
-          />
-        </form>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept=".pdf,.doc,.docx,.txt,.csv,image/*,application/json"
+              className="hidden"
+            />
+          </form>
+        </div>
 
         {/* Mobile backdrop with better blur */}
         {isSidebarOpen && (
