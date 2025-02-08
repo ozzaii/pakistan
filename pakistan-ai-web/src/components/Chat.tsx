@@ -655,12 +655,12 @@ export default function Chat() {
 
   return (
     <div className="flex flex-col lg:flex-row h-full w-full relative">
-      {/* Mobile Menu Button - Fixed top with safe area */}
+      {/* Mobile Menu Button - Fixed bottom right */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="lg:hidden fixed top-safe right-3 z-[60] p-2.5 m-3 bg-black/20 hover:bg-black/30 active:bg-black/40 backdrop-blur-lg rounded-xl text-white shadow-lg ring-1 ring-white/10 transition-all"
+        className="lg:hidden fixed bottom-6 right-4 z-[60] p-3.5 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 backdrop-blur-xl rounded-full text-white shadow-lg shadow-emerald-500/20 ring-1 ring-white/20 transition-all"
       >
-        <MessageCircle className="w-5 h-5" />
+        <MessageCircle className="w-6 h-6" />
       </button>
 
       {/* Mobile Bottom Sheet Sidebar - With safe area and better gestures */}
@@ -681,13 +681,15 @@ export default function Chat() {
         
         {/* Mobile sidebar content with better touch targets */}
         <div className="p-4 flex flex-col gap-3 overflow-y-auto">
-          <button
-            onClick={createNewChat}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-white rounded-xl transition-all shadow-lg shadow-emerald-500/20 ring-1 ring-white/20 touch-none"
-          >
-            <PlusCircle className="w-5 h-5" />
-            New Chat
-          </button>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-lg font-semibold text-white">Your Chats</h2>
+            <button
+              onClick={createNewChat}
+              className="flex items-center justify-center p-2 bg-emerald-500/20 hover:bg-emerald-500/30 active:bg-emerald-500/40 text-emerald-400 rounded-xl transition-all ring-1 ring-emerald-500/30 touch-none"
+            >
+              <PlusCircle className="w-5 h-5" />
+            </button>
+          </div>
           
           <div className="flex-1 space-y-2.5">
             {sessions.map(session => (
@@ -730,14 +732,16 @@ export default function Chat() {
       </div>
 
       {/* Desktop Sidebar */}
-      <div className="hidden lg:flex w-72 h-full flex-col gap-3 p-3 bg-black/40 backdrop-blur-xl border-r border-white/10">
-        <button
-          onClick={createNewChat}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-white rounded-xl transition-all shadow-lg shadow-emerald-500/20 ring-1 ring-white/20"
-        >
-          <PlusCircle className="w-5 h-5" />
-          New Chat
-        </button>
+      <div className="hidden lg:flex w-80 h-full flex-col gap-3 p-3 bg-black/40 backdrop-blur-xl border-r border-white/10">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-lg font-semibold text-white">Your Chats</h2>
+          <button
+            onClick={createNewChat}
+            className="flex items-center justify-center p-2 bg-emerald-500/20 hover:bg-emerald-500/30 active:bg-emerald-500/40 text-emerald-400 rounded-xl transition-all ring-1 ring-emerald-500/30"
+          >
+            <PlusCircle className="w-5 h-5" />
+          </button>
+        </div>
         
         <div className="flex-1 overflow-y-auto space-y-2 pr-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
           {sessions.map(session => (
@@ -779,7 +783,7 @@ export default function Chat() {
       <div className="flex-1 flex flex-col h-full w-full relative">
         {/* Header - With safe area */}
         <div className="flex justify-between items-center p-3 pt-safe border-b border-white/10 bg-black/20 backdrop-blur-xl shrink-0">
-          <div className="flex items-center gap-2 ml-14 lg:ml-0">
+          <div className="flex items-center gap-2">
             <h2 className="text-white text-base sm:text-lg font-semibold [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
               🇵🇰 Pakistan AI
             </h2>
