@@ -6,13 +6,18 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: write
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -23,15 +28,19 @@ jobs:
 
       - name: Install Dependencies
         working-directory: pakistan-ai-web
-        run: npm ci
+        run: |
+          npm ci
+          npm install sharp
 
       - name: Build
         working-directory: pakistan-ai-web
         env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_GEMINI_API_KEY: ${{ secrets.NEXT_PUBLIC_GEMINI_API_KEY }}
+          NODE_ENV: production
         run: |
           npm run build
-          touch out/.nojekyll # Prevents GitHub Pages from bypassing files that begin with an underscore
+          touch out/.nojekyll
+          cp -r public/* out/
 
       - name: Deploy to GitHub Pages
         if: github.ref == 'refs/heads/main'
@@ -39,4 +48,5 @@ jobs:
         with:
           branch: gh-pages
           folder: pakistan-ai-web/out
-          clean: true 
+          clean: true
+          single-commit: true 

@@ -12,16 +12,33 @@ interface Message {
   error?: boolean;
 }
 
-interface ApiError {
-  status: number;
-  message: string;
-}
+const SYSTEM_PROMPT = `You are a knowledgeable AI assistant with deep understanding of Pakistani culture, relationships, and values. Your role is to:
+
+1. Provide guidance based on Pakistani cultural values and traditions
+2. Understand and respect family dynamics in Pakistani society
+3. Consider Islamic principles when relevant to relationships
+4. Be aware of cultural sensitivities and traditions
+5. Offer advice that balances modern perspectives with traditional values
+6. Help with relationship matters while respecting cultural boundaries
+7. Share insights about Pakistani customs, celebrations, and social norms
+8. Provide emotional support in a culturally appropriate way
+9. Help navigate intergenerational relationships
+10. Address marriage, family, and social relationships in the Pakistani context
+
+Remember to:
+- Be respectful of cultural and religious values
+- Consider regional differences within Pakistan
+- Acknowledge the balance between tradition and modernity
+- Provide practical advice that works in Pakistani society
+- Use appropriate Urdu/Hindi phrases when relevant
+- Share relevant examples from Pakistani culture
+- Be mindful of gender dynamics in Pakistani society`;
 
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<ApiError | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -43,7 +60,62 @@ export default function Chat() {
     await handleSubmit(undefined, lastUserMessage.content);
   };
 
-  const handleSubmit = async (e?: React.FormEvent | undefined, retryContent?: string) => {
+  const callGeminiAPI = async (content: string) => {
+    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+    const payload = {
+      contents: [
+        {
+          parts: [{ text: SYSTEM_PROMPT }]
+        },
+        {
+          parts: [{ text: content }]
+        }
+      ],
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 1024,
+        topP: 0.8,
+        topK: 40
+      },
+      safetySettings: [
+        {
+          category: "HARM_CATEGORY_HARASSMENT",
+          threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        },
+        {
+          category: "HARM_CATEGORY_HATE_SPEECH",
+          threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        },
+        {
+          category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+          threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        },
+        {
+          category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+          threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        }
+      ]
+    };
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.candidates[0].content.parts[0].text;
+  };
+
+  const handleSubmit = async (e?: React.FormEvent, retryContent?: string) => {
     if (e) e.preventDefault();
     
     const content = retryContent || input;
@@ -64,32 +136,11 @@ export default function Chat() {
     setError(null);
 
     try {
-      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': process.env.NEXT_PUBLIC_API_KEY || '',
-        },
-        body: JSON.stringify({
-          messages: [...messages, userMessage].map(({ role, content }) => ({ role, content })),
-          temperature: 0.7,
-          max_tokens: 1024,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to get response');
-      }
-
-      const data = await response.json();
+      const response = await callGeminiAPI(content);
       
-      // Log usage metrics
-      console.log('API Usage:', data.usage);
-
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: data.response,
+        content: response,
         timestamp: new Date()
       }]);
       
@@ -97,13 +148,10 @@ export default function Chat() {
       setRetryCount(0);
     } catch (error) {
       console.error('Error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to get response from AI';
+      const errorMessage = error instanceof Error ? error.message : 'Failed to get response';
       
       toast.error(errorMessage);
-      setError({
-        status: error instanceof Error ? 500 : 0,
-        message: errorMessage
-      });
+      setError(errorMessage);
 
       setMessages(prev => [...prev, {
         role: 'assistant',
@@ -200,7 +248,7 @@ export default function Chat() {
         {error && (
           <div className="mt-2 text-xs text-red-300 flex items-center gap-1">
             <AlertCircle className="w-4 h-4" />
-            {error.message}
+            {error}
           </div>
         )}
       </form>
