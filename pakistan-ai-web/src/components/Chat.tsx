@@ -103,39 +103,24 @@ export default function Chat() {
   const [sessions, setSessions] = useState<ChatSession[]>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('chatSessions');
-      const parsed = saved ? JSON.parse(saved) : [];
-      // Ensure dates are properly parsed
-      return parsed.map((session: ChatSession) => ({
-        ...session,
-        createdAt: new Date(session.createdAt),
-        lastUpdated: new Date(session.lastUpdated),
-        messages: session.messages.map(msg => ({
-          ...msg,
-          timestamp: msg.timestamp ? new Date(msg.timestamp) : undefined
-        }))
-      }));
+      return saved ? JSON.parse(saved) : [{
+        id: crypto.randomUUID(),
+        title: 'New Chat',
+        messages: [],
+        createdAt: new Date(),
+        lastUpdated: new Date()
+      }];
     }
     return [];
   });
 
   const [currentSessionId, setCurrentSessionId] = useState<string>(() => {
-    // Create a new session on fresh load
-    const newId = crypto.randomUUID();
-    const newSession: ChatSession = {
-      id: newId,
-      title: 'New Chat',
-      messages: [],
-      createdAt: new Date(),
-      lastUpdated: new Date()
-    };
-    
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('chatSessions');
-      const existingSessions = saved ? JSON.parse(saved) : [];
-      localStorage.setItem('chatSessions', JSON.stringify([...existingSessions, newSession]));
+      const sessions = saved ? JSON.parse(saved) : [];
+      return sessions.length > 0 ? sessions[0].id : crypto.randomUUID();
     }
-    
-    return newId;
+    return '';
   });
 
   const [messages, setMessages] = useState<Message[]>([]);
@@ -688,74 +673,63 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Desktop Sidebar - Wider and better organized */}
-      <div className="hidden lg:flex w-[340px] h-full flex-col gap-3 p-4 bg-black/40 backdrop-blur-xl border-r border-white/10">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-lg font-semibold text-white">Your Chats</h2>
+      {/* Desktop Sidebar - Cleaner and more minimal */}
+      <div className="hidden lg:flex w-[300px] h-full flex-col bg-black/40 backdrop-blur-xl border-r border-white/10">
+        <div className="p-3 flex items-center justify-between border-b border-white/10">
+          <h2 className="text-base font-medium text-white">Chats</h2>
           <button
             onClick={createNewChat}
-            className="flex items-center justify-center p-2 bg-emerald-500/20 hover:bg-emerald-500/30 active:bg-emerald-500/40 text-emerald-400 rounded-xl transition-all ring-1 ring-emerald-500/30"
+            className="p-1.5 text-white/80 hover:text-white hover:bg-white/10 active:bg-white/20 rounded-lg transition-all"
+            title="New Chat"
           >
             <PlusCircle className="w-5 h-5" />
           </button>
         </div>
         
-        <div className="flex-1 overflow-y-auto space-y-2 pr-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+        <div className="flex-1 overflow-y-auto py-2 space-y-1 scrollbar-thin scrollbar-thumb-white/10">
           {sessions.map(session => (
-            <div key={session.id} className="flex items-center gap-2 group">
+            <div key={session.id} className="px-2">
               <button
                 onClick={() => switchSession(session.id)}
-                className={`flex-1 flex flex-col items-start gap-1 px-3 py-2.5 rounded-xl transition-all ${
+                className={`w-full flex items-center gap-3 px-2 py-2 rounded-lg transition-all group ${
                   session.id === currentSessionId
-                    ? 'bg-emerald-500/20 text-white ring-1 ring-emerald-500/30'
-                    : 'text-white/70 hover:bg-white/5 active:bg-white/10'
+                    ? 'bg-emerald-500/20 text-white'
+                    : 'text-white/70 hover:bg-white/5'
                 }`}
               >
-                <div className="flex items-center gap-2 w-full">
-                  <MessageCircle className="w-4 h-4 flex-shrink-0" />
-                  <span className="truncate text-left text-sm font-medium">{session.title}</span>
-                </div>
-                <span className="text-xs opacity-60 truncate w-full">
-                  {new Date(session.lastUpdated).toLocaleString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </span>
-              </button>
-              <button
-                onClick={() => deleteSession(session.id)}
-                className="opacity-0 group-hover:opacity-100 p-2 text-white/70 hover:text-white hover:bg-red-500/20 active:bg-red-500/30 rounded-lg transition-all"
-                title="Delete chat"
-              >
-                <Trash2 className="w-4 h-4" />
+                <MessageCircle className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate text-left text-sm">{session.title}</span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteSession(session.id);
+                  }}
+                  className="ml-auto p-1 opacity-0 group-hover:opacity-100 text-white/40 hover:text-white hover:bg-white/10 rounded transition-all"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
               </button>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Main Chat Area - Better spacing */}
+      {/* Main Chat Area - Cleaner spacing */}
       <div className="flex-1 flex flex-col h-full w-full relative">
-        {/* Header - Cleaner */}
-        <div className="flex justify-between items-center px-4 py-3 pt-safe bg-black/20 backdrop-blur-xl shrink-0">
-          <div className="flex items-center gap-2">
-            <h2 className="text-white text-lg font-semibold [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
-              🇵🇰 Pakistan AI
-            </h2>
-          </div>
+        {/* Header - More minimal */}
+        <div className="flex justify-between items-center h-12 px-4 bg-black/20 backdrop-blur-xl shrink-0 border-b border-white/10">
+          <h2 className="text-white text-base font-medium">🇵🇰 Pakistan AI</h2>
           <button
             onClick={clearHistory}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 active:bg-red-500/30 text-red-400 rounded-lg transition-all ring-1 ring-red-500/30"
+            className="p-1.5 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+            title="Clear chat"
           >
             <Trash2 className="w-4 h-4" />
-            <span className="text-sm font-medium">Clear</span>
           </button>
         </div>
 
-        {/* Messages area - Better mobile spacing */}
-        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 scroll-smooth scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent min-h-0 pb-32 lg:pb-4">
+        {/* Messages area - Clean spacing */}
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 scroll-smooth min-h-0 pb-32 lg:pb-4">
           {messages.length === 0 && (
             <div className="text-center text-white/90 mt-6 sm:mt-8">
               <p className="mb-3 text-lg sm:text-xl font-medium [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
@@ -845,18 +819,18 @@ export default function Chat() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input area - Fixed on mobile with better spacing */}
+        {/* Input area - Cleaner */}
         <form 
           onSubmit={handleSubmit} 
-          className="lg:relative fixed bottom-0 left-0 right-0 p-4 pb-safe-or-6 border-t border-white/10 bg-black/95 lg:bg-black/20 backdrop-blur-xl lg:backdrop-blur-sm shadow-[0_-8px_32px_rgba(0,0,0,0.2)]"
+          className="lg:relative fixed bottom-0 left-0 right-0 p-4 border-t border-white/10 bg-black/95 lg:bg-black/20 backdrop-blur-xl lg:backdrop-blur-sm"
         >
-          <div className="flex items-center gap-2 max-w-5xl mx-auto">
-            <div className="flex gap-1.5">
+          <div className="flex items-center gap-2 max-w-3xl mx-auto">
+            <div className="flex gap-1">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="p-2.5 text-white/80 hover:text-white hover:bg-white/10 active:bg-white/20 rounded-xl transition-all ring-1 ring-white/10"
-                title="Upload"
+                className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+                title="Upload file"
               >
                 <FileUp className="w-5 h-5" />
               </button>
@@ -864,10 +838,10 @@ export default function Chat() {
                 type="button"
                 onClick={handleSearch}
                 disabled={isLoading}
-                className={`p-2.5 text-white/80 hover:text-white transition-all rounded-xl ring-1 ring-white/10 ${
+                className={`p-2 text-white/70 hover:text-white rounded-lg transition-all ${
                   isSearching 
-                    ? 'bg-emerald-500/20 text-emerald-400 ring-emerald-500/30' 
-                    : 'hover:bg-white/10 active:bg-white/20'
+                    ? 'bg-emerald-500/20 text-emerald-400' 
+                    : 'hover:bg-white/10'
                 }`}
                 title={isSearching ? "Search" : "Web Search"}
               >
@@ -885,7 +859,7 @@ export default function Chat() {
                   ? "Search..." 
                   : "Type message..."
               }
-              className="flex-1 bg-black/20 text-white placeholder-white/50 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ring-1 ring-white/10 text-sm sm:text-base transition-all"
+              className="flex-1 bg-black/20 text-white placeholder-white/50 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 text-sm transition-all"
               disabled={isLoading}
             />
             {error ? (
@@ -893,7 +867,7 @@ export default function Chat() {
                 type="button"
                 onClick={handleRetry}
                 disabled={isLoading || retryCount >= 3}
-                className="p-2.5 text-white/80 hover:text-white hover:bg-white/10 active:bg-white/20 rounded-xl transition-all ring-1 ring-white/10 disabled:opacity-50"
+                className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all disabled:opacity-50"
                 title="Retry"
               >
                 <RefreshCcw className="w-5 h-5" />
@@ -902,23 +876,23 @@ export default function Chat() {
               <button
                 type="submit"
                 disabled={isLoading || !input.trim()}
-                className="p-2.5 text-white/80 hover:text-white hover:bg-emerald-500/20 active:bg-emerald-500/30 rounded-xl transition-all ring-1 ring-white/10 disabled:opacity-50 disabled:hover:bg-transparent"
+                className="p-2 text-white/70 hover:text-white hover:bg-emerald-500/20 rounded-lg transition-all disabled:opacity-50"
               >
                 <Send className="w-5 h-5" />
               </button>
             )}
           </div>
-          {/* Improved error and file indicators */}
+          {/* Error and file indicators */}
           {(pendingFile || error) && (
-            <div className="mt-2 text-xs flex items-center gap-3 max-w-5xl mx-auto">
+            <div className="mt-2 text-xs flex items-center gap-2 max-w-3xl mx-auto">
               {pendingFile && (
-                <span className="text-emerald-400/90 flex items-center gap-1.5 bg-emerald-500/10 px-2.5 py-1.5 rounded-lg ring-1 ring-emerald-500/30">
+                <span className="text-emerald-400 flex items-center gap-1">
                   <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
                   File ready
                 </span>
               )}
               {error && (
-                <span className="text-red-400/90 flex items-center gap-1.5 bg-red-500/10 px-2.5 py-1.5 rounded-lg ring-1 ring-red-500/30">
+                <span className="text-red-400 flex items-center gap-1">
                   <AlertCircle className="w-4 h-4" />
                   {error}
                 </span>
