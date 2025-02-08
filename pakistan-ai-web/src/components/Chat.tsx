@@ -83,7 +83,7 @@ export default function Chat() {
 
   const callGeminiAPI = async (content: string) => {
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
     // Check for special code and update mode
     if (content.toLowerCase().includes('wali123456')) {
@@ -99,7 +99,13 @@ export default function Chat() {
         parts: [
           { text: fullPrompt }
         ]
-      }]
+      }],
+      generationConfig: {
+        temperature: 0.7,
+        topK: 40,
+        topP: 0.8,
+        maxOutputTokens: 1024,
+      }
     };
 
     try {
