@@ -714,210 +714,214 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Main Chat Area - Cleaner spacing */}
+      {/* Main Chat Area - Premium AF */}
       <div className="flex-1 flex flex-col h-full w-full">
-        {/* Header - More minimal */}
-        <div className="flex justify-between items-center h-12 px-4 bg-black/20 backdrop-blur-xl shrink-0 border-b border-white/10">
-          <h2 className="text-white text-base font-medium">🇵🇰 Pakistan AI</h2>
+        {/* Header - Clean + minimal */}
+        <div className="flex justify-between items-center h-14 px-4 bg-black/20 backdrop-blur-xl shrink-0">
+          <h2 className="text-white text-base font-medium tracking-wide">🇵🇰 Pakistan AI</h2>
           <button
             onClick={clearHistory}
-            className="p-1.5 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+            className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all"
             title="Clear chat"
           >
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Messages area - Clean spacing */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 scroll-smooth">
-          {messages.length === 0 && (
-            <div className="text-center text-white/90 mt-6 sm:mt-8">
-              <p className="mb-3 text-lg sm:text-xl font-medium [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
-                السَّلامُ عَلَيْكُم 👋
-              </p>
-              <p className="text-base sm:text-lg mb-6">How may I assist you today?</p>
-              <div className="max-w-sm mx-auto text-sm bg-black/20 backdrop-blur-lg rounded-xl p-4 shadow-xl ring-1 ring-white/10">
-                <p className="mb-2 text-emerald-400 font-medium">You can:</p>
-                <ul className="space-y-2 text-white/80">
-                  <li className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
-                    Ask questions in English or Urdu
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
-                    Upload documents for analysis
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
-                    Search for latest information
-                  </li>
-                </ul>
+        {/* Messages + Input Container - Premium positioning */}
+        <div className="flex-1 flex flex-col max-h-[calc(100vh-3.5rem)] lg:max-h-[85vh] mx-auto w-full lg:w-[85%] xl:w-[75%] 2xl:w-[65%]">
+          {/* Messages area - Clean scroll */}
+          <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 scroll-smooth">
+            {messages.length === 0 && (
+              <div className="text-center text-white/90 mt-6 sm:mt-8">
+                <p className="mb-3 text-lg sm:text-xl font-medium [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
+                  السَّلامُ عَلَيْكُم 👋
+                </p>
+                <p className="text-base sm:text-lg mb-6">How may I assist you today?</p>
+                <div className="max-w-sm mx-auto text-sm bg-black/20 backdrop-blur-lg rounded-xl p-4 shadow-xl ring-1 ring-white/10">
+                  <p className="mb-2 text-emerald-400 font-medium">You can:</p>
+                  <ul className="space-y-2 text-white/80">
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
+                      Ask questions in English or Urdu
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
+                      Upload documents for analysis
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
+                      Search for latest information
+                    </li>
+                  </ul>
+                </div>
               </div>
-            </div>
-          )}
-          
-          {/* Messages */}
-          <AnimatePresence>
-            {messages.map((message, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} group`}
-              >
-                <div
-                  className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-4 py-3 ${
-                    message.role === 'user'
-                      ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 ring-1 ring-white/20'
-                      : message.error
-                      ? 'bg-red-500/10 text-white ring-1 ring-red-500/30'
-                      : 'bg-black/20 text-white backdrop-blur-sm ring-1 ring-white/10'
-                  } relative group-hover:shadow-xl transition-all duration-200`}
-                >
-                  {message.content}
-                  {message.generatedFile && (
-                    <div className="mt-3 flex items-center gap-2">
-                      <button
-                        onClick={() => handleDownload(
-                          message.generatedFile!.content,
-                          message.generatedFile!.name,
-                          message.generatedFile!.type
-                        )}
-                        className="flex items-center gap-1.5 text-xs bg-emerald-500/20 hover:bg-emerald-500/30 active:bg-emerald-500/40 text-emerald-400 px-3 py-1.5 rounded-lg transition-all ring-1 ring-emerald-500/30"
-                      >
-                        <Download className="w-3.5 h-3.5" />
-                        Download {message.generatedFile.name}
-                      </button>
-                    </div>
-                  )}
-                  {message.timestamp && (
-                    <div className="text-xs opacity-0 group-hover:opacity-60 mt-1.5 transition-opacity">
-                      {new Date(message.timestamp).toLocaleString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            ))}
-            {isLoading && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex justify-start"
-              >
-                <div className="bg-black/20 backdrop-blur-sm rounded-2xl px-4 py-3 ring-1 ring-white/10">
-                  <Loader2 className="w-5 h-5 animate-spin text-white" />
-                </div>
-              </motion.div>
             )}
-          </AnimatePresence>
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Input area - Fixed bottom */}
-        <div className="shrink-0 w-full border-t border-white/10 bg-black/95 lg:bg-black/20 backdrop-blur-xl lg:backdrop-blur-sm">
-          <form 
-            onSubmit={handleSubmit} 
-            className="p-4 max-w-3xl mx-auto"
-          >
-            <div className="flex items-center gap-2">
-              <div className="flex gap-1">
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all"
-                  title="Upload file"
+            
+            {/* Messages */}
+            <AnimatePresence>
+              {messages.map((message, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} group`}
                 >
-                  <FileUp className="w-5 h-5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSearch}
-                  disabled={isLoading}
-                  className={`p-2 text-white/70 hover:text-white rounded-lg transition-all ${
-                    isSearching 
-                      ? 'bg-emerald-500/20 text-emerald-400' 
-                      : 'hover:bg-white/10'
-                  }`}
-                  title={isSearching ? "Search" : "Web Search"}
+                  <div
+                    className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-4 py-3 ${
+                      message.role === 'user'
+                        ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 ring-1 ring-white/20'
+                        : message.error
+                        ? 'bg-red-500/10 text-white ring-1 ring-red-500/30'
+                        : 'bg-black/20 text-white backdrop-blur-sm ring-1 ring-white/10'
+                    } relative group-hover:shadow-xl transition-all duration-200`}
+                  >
+                    {message.content}
+                    {message.generatedFile && (
+                      <div className="mt-3 flex items-center gap-2">
+                        <button
+                          onClick={() => handleDownload(
+                            message.generatedFile!.content,
+                            message.generatedFile!.name,
+                            message.generatedFile!.type
+                          )}
+                          className="flex items-center gap-1.5 text-xs bg-emerald-500/20 hover:bg-emerald-500/30 active:bg-emerald-500/40 text-emerald-400 px-3 py-1.5 rounded-lg transition-all ring-1 ring-emerald-500/30"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          Download {message.generatedFile.name}
+                        </button>
+                      </div>
+                    )}
+                    {message.timestamp && (
+                      <div className="text-xs opacity-0 group-hover:opacity-60 mt-1.5 transition-opacity">
+                        {new Date(message.timestamp).toLocaleString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+              {isLoading && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex justify-start"
                 >
-                  <Search className="w-5 h-5" />
-                </button>
-              </div>
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder={
-                  pendingFile 
-                    ? `Instructions for ${pendingFile.name}...`
-                    : isSearching 
-                    ? "Search..." 
-                    : "Type message..."
-                }
-                className="flex-1 bg-black/20 text-white placeholder-white/50 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 text-sm transition-all"
-                disabled={isLoading}
-              />
-              {error ? (
-                <button
-                  type="button"
-                  onClick={handleRetry}
-                  disabled={isLoading || retryCount >= 3}
-                  className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all disabled:opacity-50"
-                  title="Retry"
-                >
-                  <RefreshCcw className="w-5 h-5" />
-                </button>
-              ) : (
-                <button
-                  type="submit"
-                  disabled={isLoading || !input.trim()}
-                  className="p-2 text-white/70 hover:text-white hover:bg-emerald-500/20 rounded-lg transition-all disabled:opacity-50"
-                >
-                  <Send className="w-5 h-5" />
-                </button>
+                  <div className="bg-black/20 backdrop-blur-sm rounded-2xl px-4 py-3 ring-1 ring-white/10">
+                    <Loader2 className="w-5 h-5 animate-spin text-white" />
+                  </div>
+                </motion.div>
               )}
-            </div>
-            {/* Error and file indicators */}
-            {(pendingFile || error) && (
-              <div className="mt-2 text-xs flex items-center gap-2 max-w-3xl mx-auto">
-                {pendingFile && (
-                  <span className="text-emerald-400 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
-                    File ready
-                  </span>
-                )}
-                {error && (
-                  <span className="text-red-400 flex items-center gap-1">
-                    <AlertCircle className="w-4 h-4" />
-                    {error}
-                  </span>
+            </AnimatePresence>
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input area - Premium AF */}
+          <div className="w-full bg-black/20 backdrop-blur-sm px-4 py-4 lg:rounded-2xl lg:my-6 lg:mx-auto lg:max-w-3xl lg:ring-1 lg:ring-white/10 lg:shadow-xl">
+            <form 
+              onSubmit={handleSubmit} 
+              className="flex flex-col gap-3"
+            >
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="p-2.5 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all"
+                    title="Upload file"
+                  >
+                    <FileUp className="w-5 h-5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSearch}
+                    disabled={isLoading}
+                    className={`p-2.5 text-white/70 hover:text-white rounded-xl transition-all ${
+                      isSearching 
+                        ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30' 
+                        : 'hover:bg-white/10'
+                    }`}
+                    title={isSearching ? "Search" : "Web Search"}
+                  >
+                    <Search className="w-5 h-5" />
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={
+                    pendingFile 
+                      ? `Instructions for ${pendingFile.name}...`
+                      : isSearching 
+                      ? "Search..." 
+                      : "Type message..."
+                  }
+                  className="flex-1 bg-black/20 text-white placeholder-white/50 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 text-sm transition-all"
+                  disabled={isLoading}
+                />
+                {error ? (
+                  <button
+                    type="button"
+                    onClick={handleRetry}
+                    disabled={isLoading || retryCount >= 3}
+                    className="p-2.5 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all disabled:opacity-50"
+                    title="Retry"
+                  >
+                    <RefreshCcw className="w-5 h-5" />
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={isLoading || !input.trim()}
+                    className="p-2.5 text-white/70 hover:text-white hover:bg-emerald-500/20 rounded-xl transition-all disabled:opacity-50"
+                  >
+                    <Send className="w-5 h-5" />
+                  </button>
                 )}
               </div>
-            )}
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileUpload}
-              accept=".pdf,.doc,.docx,.txt,.csv,image/*,application/json"
-              className="hidden"
-            />
-          </form>
-        </div>
 
-        {/* Mobile backdrop with better blur */}
-        {isSidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black/70 backdrop-blur-md z-40 lg:hidden"
-            onClick={() => setIsSidebarOpen(false)}
-          />
-        )}
+              {/* Status indicators - Premium polish */}
+              {(pendingFile || error) && (
+                <div className="flex items-center gap-3 px-1">
+                  {pendingFile && (
+                    <span className="text-emerald-400 flex items-center gap-1.5 text-xs">
+                      <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+                      File ready for analysis
+                    </span>
+                  )}
+                  {error && (
+                    <span className="text-red-400 flex items-center gap-1.5 text-xs">
+                      <AlertCircle className="w-3.5 h-3.5" />
+                      {error}
+                    </span>
+                  )}
+                </div>
+              )}
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileUpload}
+                accept=".pdf,.doc,.docx,.txt,.csv,image/*,application/json"
+                className="hidden"
+              />
+            </form>
+          </div>
+        </div>
       </div>
+
+      {/* Mobile backdrop - Premium blur */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-md z-40 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
     </div>
   );
 }
