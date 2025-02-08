@@ -4,20 +4,9 @@ import { motion } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
 import Chat from '@/components/Chat';
 
-const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
-};
-
 export default function Home() {
   return (
-    <motion.main
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.8 }}
-      className="h-[100dvh] supports-[height:100svh]:h-[100svh] supports-[height:100dvh]:h-[100dvh] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-800 via-emerald-900 to-gray-900 relative overflow-hidden selection:bg-emerald-500/30 flex flex-col"
-    >
+    <main className="h-[100dvh] supports-[height:100svh]:h-[100svh] supports-[height:100dvh]:h-[100dvh] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-800 via-emerald-900 to-gray-900 relative overflow-hidden selection:bg-emerald-500/30 flex flex-col">
       {/* Premium background pattern */}
       <motion.div 
         initial={{ opacity: 0 }}
@@ -51,14 +40,15 @@ export default function Home() {
 
       {/* Chat Interface - Premium container */}
       <motion.div 
-        {...fadeInUp}
-        transition={{ ...fadeInUp.transition, delay: 0.3 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className="flex-1 w-full min-h-0 pt-safe px-0 pb-safe"
       >
         <div className="h-full">
           <Chat />
         </div>
       </motion.div>
-    </motion.main>
+    </main>
   );
-}
+} 

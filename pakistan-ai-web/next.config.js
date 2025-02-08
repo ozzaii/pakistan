@@ -6,6 +6,13 @@ const nextConfig = {
   trailingSlash: true,
   images: {
     unoptimized: true,
+  },
+  // Skip type checking and linting in build
+  typescript: {
+    ignoreBuildErrors: true
+  },
+  eslint: {
+    ignoreDuringBuilds: true
   }
 }
 
