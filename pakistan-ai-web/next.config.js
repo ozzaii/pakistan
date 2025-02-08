@@ -9,6 +9,7 @@ const nextConfig = {
   },
   basePath: process.env.NODE_ENV === 'production' ? '/pakistan' : '',
   assetPrefix: process.env.NODE_ENV === 'production' ? '/pakistan/' : '',
+  trailingSlash: true,
 }
 
 module.exports = nextConfig 
