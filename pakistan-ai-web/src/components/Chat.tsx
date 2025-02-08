@@ -655,19 +655,80 @@ export default function Chat() {
 
   return (
     <div className="flex flex-col lg:flex-row h-full w-full relative">
-      {/* Mobile Menu Button - Premium styling */}
+      {/* Mobile Menu Button - Fixed top */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="lg:hidden fixed top-3 left-3 z-[60] p-2 bg-black/20 hover:bg-black/30 active:bg-black/40 backdrop-blur-lg rounded-xl text-white shadow-lg ring-1 ring-white/10 transition-all"
+        className="lg:hidden fixed top-3 right-3 z-[60] p-2 bg-black/20 hover:bg-black/30 active:bg-black/40 backdrop-blur-lg rounded-xl text-white shadow-lg ring-1 ring-white/10 transition-all"
       >
         <MessageCircle className="w-5 h-5" />
       </button>
 
-      {/* Sidebar - Premium glass morphism */}
-      <div className={`${
-        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } lg:translate-x-0 fixed lg:relative w-72 h-full z-50 transition-transform duration-300 ease-in-out
-      bg-black/40 backdrop-blur-xl lg:backdrop-blur-2xl border-r border-white/10 flex flex-col gap-3 p-3`}>
+      {/* Mobile Bottom Sheet Sidebar */}
+      <div 
+        className={`
+          lg:hidden fixed inset-x-0 bottom-0 z-50 transition-transform duration-300 ease-in-out
+          ${isSidebarOpen ? 'translate-y-0' : 'translate-y-full'}
+          bg-black/90 backdrop-blur-2xl border-t border-white/10 rounded-t-3xl
+          max-h-[80vh] overflow-hidden flex flex-col
+        `}
+      >
+        {/* Bottom sheet pull indicator */}
+        <div className="p-3 flex justify-center">
+          <div className="w-12 h-1 bg-white/20 rounded-full"></div>
+        </div>
+        
+        {/* Mobile sidebar content */}
+        <div className="p-3 flex flex-col gap-3 overflow-y-auto">
+          <button
+            onClick={createNewChat}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-white rounded-xl transition-all shadow-lg shadow-emerald-500/20 ring-1 ring-white/20"
+          >
+            <PlusCircle className="w-5 h-5" />
+            New Chat
+          </button>
+          
+          <div className="flex-1 space-y-2">
+            {sessions.map(session => (
+              <div key={session.id} className="flex items-center gap-2 group">
+                <button
+                  onClick={() => {
+                    switchSession(session.id);
+                    setIsSidebarOpen(false);
+                  }}
+                  className={`flex-1 flex flex-col items-start gap-1 px-4 py-3 rounded-xl transition-all ${
+                    session.id === currentSessionId
+                      ? 'bg-emerald-500/20 text-white ring-1 ring-emerald-500/30'
+                      : 'text-white/70 hover:bg-white/5 active:bg-white/10'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 w-full">
+                    <MessageCircle className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate text-left text-sm font-medium">{session.title}</span>
+                  </div>
+                  <span className="text-xs opacity-60 truncate w-full">
+                    {new Date(session.lastUpdated).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+                </button>
+                <button
+                  onClick={() => deleteSession(session.id)}
+                  className="p-2 text-white/70 hover:text-white hover:bg-red-500/20 active:bg-red-500/30 rounded-lg transition-all"
+                  title="Delete chat"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:flex w-72 h-full flex-col gap-3 p-3 bg-black/40 backdrop-blur-xl border-r border-white/10">
         <button
           onClick={createNewChat}
           className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-white rounded-xl transition-all shadow-lg shadow-emerald-500/20 ring-1 ring-white/20"
@@ -680,10 +741,7 @@ export default function Chat() {
           {sessions.map(session => (
             <div key={session.id} className="flex items-center gap-2 group">
               <button
-                onClick={() => {
-                  switchSession(session.id);
-                  setIsSidebarOpen(false);
-                }}
+                onClick={() => switchSession(session.id)}
                 className={`flex-1 flex flex-col items-start gap-1 px-3 py-2.5 rounded-xl transition-all ${
                   session.id === currentSessionId
                     ? 'bg-emerald-500/20 text-white ring-1 ring-emerald-500/30'
@@ -715,11 +773,11 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Main Chat Area - Premium container */}
+      {/* Main Chat Area */}
       <div className="flex-1 flex flex-col h-full w-full relative">
-        {/* Header - Glass effect */}
+        {/* Header */}
         <div className="flex justify-between items-center p-3 border-b border-white/10 bg-black/20 backdrop-blur-xl shrink-0">
-          <div className="flex items-center gap-2 ml-12 lg:ml-0">
+          <div className="flex items-center gap-2">
             <h2 className="text-white text-base sm:text-lg font-semibold [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
               🇵🇰 Pakistan AI
             </h2>
@@ -736,8 +794,8 @@ export default function Chat() {
           </button>
         </div>
 
-        {/* Messages area - Premium scrolling */}
-        <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 scroll-smooth scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent min-h-0">
+        {/* Messages area */}
+        <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 scroll-smooth scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent min-h-0 pb-20 lg:pb-4">
           {messages.length === 0 && (
             <div className="text-center text-white/90 mt-6 sm:mt-8">
               <p className="mb-3 text-lg sm:text-xl font-medium [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
@@ -827,9 +885,12 @@ export default function Chat() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input area - Premium controls */}
-        <form onSubmit={handleSubmit} className="p-3 border-t border-white/10 bg-black/20 backdrop-blur-xl shrink-0">
-          <div className="flex items-center gap-2">
+        {/* Input area - Fixed on mobile */}
+        <form 
+          onSubmit={handleSubmit} 
+          className="lg:relative fixed bottom-0 left-0 right-0 p-3 border-t border-white/10 bg-black/90 backdrop-blur-xl lg:backdrop-blur-sm lg:bg-black/20"
+        >
+          <div className="flex items-center gap-2 max-w-5xl mx-auto">
             <div className="flex gap-1.5">
               <button
                 type="button"
@@ -889,7 +950,7 @@ export default function Chat() {
           </div>
           {/* Improved error and file indicators */}
           {(pendingFile || error) && (
-            <div className="mt-2 text-xs flex items-center gap-3">
+            <div className="mt-2 text-xs flex items-center gap-3 max-w-5xl mx-auto">
               {pendingFile && (
                 <span className="text-emerald-400/90 flex items-center gap-1.5 bg-emerald-500/10 px-2 py-1 rounded-lg ring-1 ring-emerald-500/30">
                   <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
@@ -913,7 +974,7 @@ export default function Chat() {
           />
         </form>
 
-        {/* Mobile backdrop - Premium blur */}
+        {/* Mobile backdrop */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/60 backdrop-blur-md z-40 lg:hidden"
