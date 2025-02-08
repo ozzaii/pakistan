@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, FileUp, Search, Loader2, AlertCircle, RefreshCcw, Trash2, Download } from 'lucide-react';
+import { Send, FileUp, Search, Loader2, AlertCircle, RefreshCcw, Trash2, Download, PlusCircle, MessageCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface Message {
@@ -45,6 +45,14 @@ interface GeminiPayload {
     category: string;
     threshold: string;
   }>;
+}
+
+interface ChatSession {
+  id: string;
+  title: string;
+  messages: Message[];
+  createdAt: Date;
+  lastUpdated: Date;
 }
 
 const ADVISOR_PROMPT = `As your dedicated Ministry AI Advisor, I am now in FULL FORCE mode - your personal strategic partner in shaping Pakistan's future. With direct access to comprehensive policy insights and governance expertise, I serve as your confidential advisor on Pakistan's most critical challenges.
@@ -113,24 +121,110 @@ I maintain utmost respect for:
 I'm here to help while staying true to our Pakistani values and cultural context. 🇵🇰`;
 
 export default function Chat() {
-  const [messages, setMessages] = useState<Message[]>(() => {
+  const [sessions, setSessions] = useState<ChatSession[]>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('chatHistory');
+      const saved = localStorage.getItem('chatSessions');
       return saved ? JSON.parse(saved) : [];
     }
     return [];
   });
 
-  useEffect(() => {
-    if (messages.length > 0) {
-      localStorage.setItem('chatHistory', JSON.stringify(messages));
+  const [currentSessionId, setCurrentSessionId] = useState<string>(() => {
+    // Create a new session on fresh load
+    const newId = crypto.randomUUID();
+    const newSession: ChatSession = {
+      id: newId,
+      title: 'New Chat',
+      messages: [],
+      createdAt: new Date(),
+      lastUpdated: new Date()
+    };
+    
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('chatSessions');
+      const existingSessions = saved ? JSON.parse(saved) : [];
+      localStorage.setItem('chatSessions', JSON.stringify([...existingSessions, newSession]));
     }
-  }, [messages]);
+    
+    return newId;
+  });
+
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  useEffect(() => {
+    if (sessions.length > 0) {
+      localStorage.setItem('chatSessions', JSON.stringify(sessions));
+    }
+  }, [sessions]);
+
+  useEffect(() => {
+    const currentSession = sessions.find(s => s.id === currentSessionId);
+    if (currentSession) {
+      setMessages(currentSession.messages);
+    }
+  }, [currentSessionId, sessions]);
+
+  useEffect(() => {
+    setSessions(prev => prev.map(session => 
+      session.id === currentSessionId
+        ? {
+            ...session,
+            messages,
+            lastUpdated: new Date(),
+            title: messages[0]?.content.slice(0, 30) || 'New Chat'
+          }
+        : session
+    ));
+  }, [messages, currentSessionId]);
+
+  const createNewChat = () => {
+    const newId = crypto.randomUUID();
+    const newSession: ChatSession = {
+      id: newId,
+      title: 'New Chat',
+      messages: [],
+      createdAt: new Date(),
+      lastUpdated: new Date()
+    };
+    
+    setSessions(prev => [...prev, newSession]);
+    setCurrentSessionId(newId);
+    setMessages([]);
+    setInput('');
+    setError(null);
+    setIsLoading(false);
+    setIsSearching(false);
+    setPendingFile(null);
+  };
+
+  const switchSession = (sessionId: string) => {
+    setCurrentSessionId(sessionId);
+    const session = sessions.find(s => s.id === sessionId);
+    if (session) {
+      setMessages(session.messages);
+      setInput('');
+      setError(null);
+      setIsLoading(false);
+      setIsSearching(false);
+      setPendingFile(null);
+    }
+  };
+
+  const deleteSession = (sessionId: string) => {
+    setSessions(prev => prev.filter(s => s.id !== sessionId));
+    if (sessionId === currentSessionId) {
+      const remainingSessions = sessions.filter(s => s.id !== sessionId);
+      if (remainingSessions.length > 0) {
+        switchSession(remainingSessions[0].id);
+      } else {
+        createNewChat();
+      }
+    }
+  };
 
   const clearHistory = () => {
-    setMessages([]);
-    localStorage.removeItem('chatHistory');
-    toast.success('Chat history cleared!');
+    deleteSession(currentSessionId);
+    toast.success('Chat cleared!');
   };
 
   const [input, setInput] = useState('');
@@ -502,187 +596,226 @@ export default function Chat() {
   };
 
   return (
-    <div className="flex flex-col h-[600px] max-w-4xl mx-auto bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl shadow-xl">
-      <div className="flex justify-between items-center p-4 border-b border-white border-opacity-10">
-        <div className="flex items-center space-x-2">
-          <h2 className="text-white text-lg font-semibold">🇵🇰 Pakistan AI Assistant</h2>
-          <span className="text-xs text-emerald-300">Built by Abdul Wali bin Salman</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={clearHistory}
-            className="flex items-center px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-          >
-            <Trash2 className="w-4 h-4 mr-1" />
-            Clear Chat
-          </button>
-        </div>
-      </div>
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
-        {messages.length === 0 && (
-          <div className="text-center text-white text-opacity-60">
-            <p className="mb-2">السَّلامُ عَلَيْكُم (Assalam-u-Alaikum) 👋</p>
-            <p>How may I assist you today?</p>
-            <div className="mt-4 text-sm">
-              <p>You can:</p>
-              <ul className="mt-2 space-y-1">
-                <li>• Ask questions in English or Urdu</li>
-                <li>• Upload documents and specify analysis instructions</li>
-                <li>• Use web search for latest information</li>
-              </ul>
-            </div>
-          </div>
-        )}
-        <AnimatePresence>
-          {messages.map((message, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} group`}
-            >
-              <div
-                className={`max-w-[80%] rounded-2xl px-4 py-2 ${
-                  message.role === 'user'
+    <div className="flex h-[600px] max-w-6xl mx-auto">
+      {/* Sidebar */}
+      <div className="w-64 bg-black bg-opacity-40 backdrop-blur-lg rounded-l-2xl p-4 flex flex-col gap-4">
+        <button
+          onClick={createNewChat}
+          className="w-full flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"
+        >
+          <PlusCircle className="w-5 h-5" />
+          New Chat
+        </button>
+        
+        <div className="flex-1 overflow-y-auto space-y-2">
+          {sessions.map(session => (
+            <div key={session.id} className="flex items-center gap-2 group">
+              <button
+                onClick={() => switchSession(session.id)}
+                className={`flex-1 flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                  session.id === currentSessionId
                     ? 'bg-emerald-600 text-white'
-                    : message.error
-                    ? 'bg-red-500 bg-opacity-20 text-white'
-                    : 'bg-white bg-opacity-20 text-white'
-                } relative group-hover:shadow-lg transition-all duration-200`}
+                    : 'text-white text-opacity-80 hover:bg-white hover:bg-opacity-10'
+                }`}
               >
-                {message.content}
-                {message.generatedFile && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <button
-                      onClick={() => handleDownload(
-                        message.generatedFile!.content,
-                        message.generatedFile!.name,
-                        message.generatedFile!.type
-                      )}
-                      className="flex items-center gap-1 text-xs bg-emerald-500 hover:bg-emerald-600 px-2 py-1 rounded transition-colors"
-                    >
-                      <Download className="w-3 h-3" />
-                      Download {message.generatedFile.name}
-                    </button>
-                  </div>
-                )}
-                {message.timestamp && (
-                  <div className="text-xs opacity-0 group-hover:opacity-50 mt-1 transition-opacity">
-                    {new Date(message.timestamp).toLocaleString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </div>
-                )}
-              </div>
-            </motion.div>
+                <MessageCircle className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate text-left text-sm">{session.title}</span>
+              </button>
+              <button
+                onClick={() => deleteSession(session.id)}
+                className="opacity-0 group-hover:opacity-100 p-2 text-white hover:bg-red-500 rounded-lg transition-all"
+                title="Delete chat"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
           ))}
-          {isLoading && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex justify-start"
-            >
-              <div className="bg-white bg-opacity-20 rounded-2xl px-4 py-2">
-                <Loader2 className="w-5 h-5 animate-spin text-white" />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-        <div ref={messagesEndRef} />
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-4 border-t border-white border-opacity-10">
-        <div className="flex items-center space-x-4">
-          <div className="flex space-x-2">
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col bg-white bg-opacity-10 backdrop-blur-lg rounded-r-2xl">
+        <div className="flex justify-between items-center p-4 border-b border-white border-opacity-10">
+          <div className="flex items-center space-x-2">
+            <h2 className="text-white text-lg font-semibold">🇵🇰 Pakistan AI Assistant</h2>
+            <span className="text-xs text-emerald-300">Built by Abdul Wali bin Salman</span>
+          </div>
+          <div className="flex items-center space-x-2">
             <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition flex items-center relative group"
-              title="Upload Document"
+              onClick={clearHistory}
+              className="flex items-center px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
             >
-              <FileUp className="w-5 h-5" />
-              <span className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                Upload Document
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={handleSearch}
-              disabled={isLoading}
-              className={`p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition flex items-center relative group ${
-                isSearching ? 'bg-emerald-600' : ''
-              }`}
-              title={isSearching ? "Click to search" : "Activate web search"}
-            >
-              <Search className="w-5 h-5" />
-              <span className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                {isSearching ? "Click to search" : "Activate web search"}
-              </span>
+              <Trash2 className="w-4 h-4 mr-1" />
+              Clear Chat
             </button>
           </div>
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileUpload}
-            accept=".pdf,.doc,.docx,.txt,.csv,image/*,application/json"
-            className="hidden"
-          />
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={
-              pendingFile 
-                ? `Add analysis instructions for ${pendingFile.name}...`
-                : isSearching 
-                ? "Enter your search query..." 
-                : "Type your message in English or Urdu..."
-            }
-            className="flex-1 bg-white bg-opacity-10 text-white placeholder-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            disabled={isLoading}
-          />
-          {error ? (
-            <button
-              type="button"
-              onClick={handleRetry}
-              disabled={isLoading || retryCount >= 3}
-              className="p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition disabled:opacity-50"
-              title="Retry last message"
-            >
-              <RefreshCcw className="w-5 h-5" />
-            </button>
-          ) : (
-            <button
-              type="submit"
-              disabled={isLoading || !input.trim()}
-              className="p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition disabled:opacity-50 relative group"
-            >
-              <Send className="w-5 h-5" />
-              <span className="absolute bottom-full mb-2 right-0 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                Send
-              </span>
-            </button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          {messages.length === 0 && (
+            <div className="text-center text-white text-opacity-60">
+              <p className="mb-2">السَّلامُ عَلَيْكُم (Assalam-u-Alaikum) 👋</p>
+              <p>How may I assist you today?</p>
+              <div className="mt-4 text-sm">
+                <p>You can:</p>
+                <ul className="mt-2 space-y-1">
+                  <li>• Ask questions in English or Urdu</li>
+                  <li>• Upload documents and specify analysis instructions</li>
+                  <li>• Use web search for latest information</li>
+                </ul>
+              </div>
+            </div>
           )}
+          <AnimatePresence>
+            {messages.map((message, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} group`}
+              >
+                <div
+                  className={`max-w-[80%] rounded-2xl px-4 py-2 ${
+                    message.role === 'user'
+                      ? 'bg-emerald-600 text-white'
+                      : message.error
+                      ? 'bg-red-500 bg-opacity-20 text-white'
+                      : 'bg-white bg-opacity-20 text-white'
+                  } relative group-hover:shadow-lg transition-all duration-200`}
+                >
+                  {message.content}
+                  {message.generatedFile && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <button
+                        onClick={() => handleDownload(
+                          message.generatedFile!.content,
+                          message.generatedFile!.name,
+                          message.generatedFile!.type
+                        )}
+                        className="flex items-center gap-1 text-xs bg-emerald-500 hover:bg-emerald-600 px-2 py-1 rounded transition-colors"
+                      >
+                        <Download className="w-3 h-3" />
+                        Download {message.generatedFile.name}
+                      </button>
+                    </div>
+                  )}
+                  {message.timestamp && (
+                    <div className="text-xs opacity-0 group-hover:opacity-50 mt-1 transition-opacity">
+                      {new Date(message.timestamp).toLocaleString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+            {isLoading && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex justify-start"
+              >
+                <div className="bg-white bg-opacity-20 rounded-2xl px-4 py-2">
+                  <Loader2 className="w-5 h-5 animate-spin text-white" />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <div ref={messagesEndRef} />
         </div>
-        {pendingFile && (
-          <div className="mt-2 text-xs text-emerald-300 flex items-center gap-1">
-            <span>📎 {pendingFile.name} ready for analysis. Add your instructions above.</span>
+
+        <form onSubmit={handleSubmit} className="p-4 border-t border-white border-opacity-10">
+          <div className="flex items-center space-x-4">
+            <div className="flex space-x-2">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition flex items-center relative group"
+                title="Upload Document"
+              >
+                <FileUp className="w-5 h-5" />
+                <span className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                  Upload Document
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={handleSearch}
+                disabled={isLoading}
+                className={`p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition flex items-center relative group ${
+                  isSearching ? 'bg-emerald-600' : ''
+                }`}
+                title={isSearching ? "Click to search" : "Activate web search"}
+              >
+                <Search className="w-5 h-5" />
+                <span className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                  {isSearching ? "Click to search" : "Activate web search"}
+                </span>
+              </button>
+            </div>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept=".pdf,.doc,.docx,.txt,.csv,image/*,application/json"
+              className="hidden"
+            />
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={
+                pendingFile 
+                  ? `Add analysis instructions for ${pendingFile.name}...`
+                  : isSearching 
+                  ? "Enter your search query..." 
+                  : "Type your message in English or Urdu..."
+              }
+              className="flex-1 bg-white bg-opacity-10 text-white placeholder-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              disabled={isLoading}
+            />
+            {error ? (
+              <button
+                type="button"
+                onClick={handleRetry}
+                disabled={isLoading || retryCount >= 3}
+                className="p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition disabled:opacity-50"
+                title="Retry last message"
+              >
+                <RefreshCcw className="w-5 h-5" />
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={isLoading || !input.trim()}
+                className="p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition disabled:opacity-50 relative group"
+              >
+                <Send className="w-5 h-5" />
+                <span className="absolute bottom-full mb-2 right-0 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                  Send
+                </span>
+              </button>
+            )}
           </div>
-        )}
-        {error && (
-          <div className="mt-2 text-xs text-red-300 flex items-center gap-1">
-            <AlertCircle className="w-4 h-4" />
-            {error}
+          {pendingFile && (
+            <div className="mt-2 text-xs text-emerald-300 flex items-center gap-1">
+              <span>📎 {pendingFile.name} ready for analysis. Add your instructions above.</span>
+            </div>
+          )}
+          {error && (
+            <div className="mt-2 text-xs text-red-300 flex items-center gap-1">
+              <AlertCircle className="w-4 h-4" />
+              {error}
+            </div>
+          )}
+          <div className="mt-2 text-xs text-emerald-300 text-center">
+            Contact: walisalman44@gmail.com
           </div>
-        )}
-        <div className="mt-2 text-xs text-emerald-300 text-center">
-          Contact: walisalman44@gmail.com
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 } 
