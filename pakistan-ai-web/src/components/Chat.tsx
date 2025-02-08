@@ -407,39 +407,46 @@ export default function Chat() {
   };
 
   const handleSearch = async () => {
-    if (!input.trim()) {
-      toast.error('Please enter a search query');
-      return;
-    }
+    if (isSearching) {
+      // If already in search mode, perform the search
+      if (!input.trim()) {
+        toast.error('Please enter a search query');
+        return;
+      }
 
-    setIsSearching(true);
-    setIsLoading(true);
+      setIsLoading(true);
 
-    try {
-      const searchPrompt = `Web Search Results for: ${input}\n\nPlease provide comprehensive information about this topic, focusing on Pakistani context where relevant. Include:\n- Key facts and details\n- Local perspectives and examples\n- Recent developments\n- Cultural considerations\n- Practical implications`;
-      
-      const response = await callGeminiAPI(searchPrompt);
-      
-      setMessages(prev => [
-        ...prev,
-        {
-          role: 'user',
-          content: `🔍 Web Search: ${input}`,
-          timestamp: new Date()
-        },
-        {
-          role: 'assistant',
-          content: `**Search Results for "${input}"**\n\n${response}`,
-          timestamp: new Date()
-        }
-      ]);
-    } catch (error) {
-      console.error('Search error:', error);
-      toast.error('Search failed. Please try again.');
-    } finally {
-      setIsSearching(false);
-      setIsLoading(false);
+      try {
+        const searchPrompt = `Web Search Results for: ${input}\n\nPlease provide comprehensive information about this topic, focusing on Pakistani context where relevant. Include:\n- Key facts and details\n- Local perspectives and examples\n- Recent developments\n- Cultural considerations\n- Practical implications`;
+        
+        const response = await callGeminiAPI(searchPrompt);
+        
+        setMessages(prev => [
+          ...prev,
+          {
+            role: 'user',
+            content: `🔍 Web Search: ${input}`,
+            timestamp: new Date()
+          },
+          {
+            role: 'assistant',
+            content: `**Search Results for "${input}"**\n\n${response}`,
+            timestamp: new Date()
+          }
+        ]);
+      } catch (error) {
+        console.error('Search error:', error);
+        toast.error('Search failed. Please try again.');
+      } finally {
+        setIsSearching(false);
+        setIsLoading(false);
+        setInput('');
+      }
+    } else {
+      // Activate search mode
+      setIsSearching(true);
       setInput('');
+      toast.success('Web search mode activated! Enter your search query.');
     }
   };
 
@@ -554,13 +561,15 @@ export default function Chat() {
             <button
               type="button"
               onClick={handleSearch}
-              disabled={isLoading || !input.trim()}
-              className="p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition flex items-center disabled:opacity-50 relative group"
-              title="Web Search"
+              disabled={isLoading}
+              className={`p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition flex items-center relative group ${
+                isSearching ? 'bg-emerald-600' : ''
+              }`}
+              title={isSearching ? "Click to search" : "Activate web search"}
             >
               <Search className="w-5 h-5" />
               <span className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                Web Search
+                {isSearching ? "Click to search" : "Activate web search"}
               </span>
             </button>
           </div>
