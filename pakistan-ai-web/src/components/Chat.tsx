@@ -145,6 +145,7 @@ export default function Chat() {
     type: string;
     data: string;
     name: string;
+    textContent?: string;
   } | null>(null);
 
   const scrollToBottom = () => {
@@ -169,6 +170,11 @@ export default function Chat() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Deactivate search mode if it's active
+    if (isSearching) {
+      setIsSearching(false);
+    }
+
     const supportedTypes = {
       'image/jpeg': true,
       'image/png': true,
@@ -192,21 +198,49 @@ export default function Chat() {
     }
 
     try {
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-      });
+      // For CSV files, read the content first
+      if (file.type === 'text/csv') {
+        const textContent = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsText(file);
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+        });
 
-      setPendingFile({
-        type: file.type,
-        data: base64,
-        name: file.name
-      });
+        // Store both text and base64 for CSV files
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+        });
 
-      setInput(`Analyze this ${file.name} for me. `);
-      toast.success('File ready! Add your analysis instructions and press Send.');
+        setPendingFile({
+          type: file.type,
+          data: base64,
+          name: file.name,
+          textContent // Add textContent for CSV files
+        });
+
+        setInput(`I have uploaded ${file.name}. Here's what I want to do with it: `);
+        toast.success('CSV file ready! Please specify what you want to do with the data.');
+      } else {
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+        });
+
+        setPendingFile({
+          type: file.type,
+          data: base64,
+          name: file.name
+        });
+
+        setInput(`Analyze this ${file.name} for me. `);
+        toast.success('File ready! Add your analysis instructions and press Send.');
+      }
     } catch (error) {
       console.error('File upload error:', error);
       toast.error('Failed to process file. Please try again.');
@@ -345,6 +379,12 @@ export default function Chat() {
     const content = retryContent || input;
     if (!content.trim()) return;
 
+    // If we're in search mode, handle it separately
+    if (isSearching) {
+      await handleSearch();
+      return;
+    }
+
     const userMessage: Message = {
       role: 'user',
       content,
@@ -366,24 +406,35 @@ export default function Chat() {
     setError(null);
 
     try {
-      const response = await callGeminiAPI(
-        content,
-        pendingFile?.data,
-        pendingFile?.type
-      );
-      
-      // Check if we should generate a document
-      const generatedFile = await generateDocument(response);
-      
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: response,
-        timestamp: new Date(),
-        ...(generatedFile && { generatedFile })
-      }]);
-      
-      if (generatedFile) {
-        toast.success('Document generated! Click the download button to save it.');
+      // Special handling for CSV files
+      if (pendingFile?.type === 'text/csv' && pendingFile.textContent) {
+        const csvPrompt = `Here is a CSV file named "${pendingFile.name}". The user wants to: ${content}\n\nCSV Content:\n${pendingFile.textContent}\n\nPlease provide a detailed analysis and follow the user's instructions regarding the CSV data.`;
+        const response = await callGeminiAPI(csvPrompt);
+        
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: response,
+          timestamp: new Date()
+        }]);
+      } else {
+        const response = await callGeminiAPI(
+          content,
+          pendingFile?.data,
+          pendingFile?.type
+        );
+        
+        const generatedFile = await generateDocument(response);
+        
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: response,
+          timestamp: new Date(),
+          ...(generatedFile && { generatedFile })
+        }]);
+        
+        if (generatedFile) {
+          toast.success('Document generated! Click the download button to save it.');
+        }
       }
       
       setRetryCount(0);
