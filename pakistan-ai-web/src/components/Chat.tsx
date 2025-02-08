@@ -654,7 +654,7 @@ export default function Chat() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex flex-col lg:flex-row h-[100dvh] w-full max-w-6xl mx-auto relative">
+    <div className="flex flex-col lg:flex-row h-full w-full relative">
       {/* Mobile Menu Button - Premium styling */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -666,7 +666,7 @@ export default function Chat() {
       {/* Sidebar - Premium glass morphism */}
       <div className={`${
         isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } lg:translate-x-0 fixed lg:relative w-72 h-[100dvh] z-50 transition-transform duration-300 ease-in-out
+      } lg:translate-x-0 fixed lg:relative w-72 h-full z-50 transition-transform duration-300 ease-in-out
       bg-black/40 backdrop-blur-xl lg:backdrop-blur-2xl border-r border-white/10 p-4 flex flex-col gap-4`}>
         <button
           onClick={createNewChat}
@@ -716,9 +716,9 @@ export default function Chat() {
       </div>
 
       {/* Main Chat Area - Premium container */}
-      <div className="flex-1 flex flex-col h-[100dvh] w-full relative">
+      <div className="flex-1 flex flex-col h-full w-full relative">
         {/* Header - Glass effect */}
-        <div className="flex justify-between items-center p-3 sm:p-4 border-b border-white/10 bg-black/20 backdrop-blur-xl">
+        <div className="flex justify-between items-center p-3 sm:p-4 border-b border-white/10 bg-black/20 backdrop-blur-xl shrink-0">
           <div className="flex items-center gap-2 ml-14 lg:ml-0">
             <h2 className="text-white text-lg font-semibold [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
               🇵🇰 Pakistan AI
@@ -737,7 +737,7 @@ export default function Chat() {
         </div>
 
         {/* Messages area - Premium scrolling */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6 scroll-smooth scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6 scroll-smooth scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent min-h-0">
           {messages.length === 0 && (
             <div className="text-center text-white/90 mt-8 sm:mt-12">
               <p className="mb-3 text-xl font-medium [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
@@ -826,7 +826,7 @@ export default function Chat() {
         </div>
 
         {/* Input area - Premium controls */}
-        <form onSubmit={handleSubmit} className="p-4 border-t border-white/10 bg-black/20 backdrop-blur-xl">
+        <form onSubmit={handleSubmit} className="p-4 border-t border-white/10 bg-black/20 backdrop-blur-xl shrink-0">
           <div className="flex items-center gap-2">
             <div className="flex gap-1.5">
               <button
