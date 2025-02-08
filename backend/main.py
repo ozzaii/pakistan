@@ -8,7 +8,7 @@ from typing import List, Optional
 import os
 from dotenv import load_dotenv
 import vertexai
-from vertexai.language_models import TextGenerationModel
+from vertexai.language_models import TextGenerationModel, ChatModel
 import logging
 import time
 from datetime import datetime, timedelta
@@ -96,8 +96,12 @@ try:
         project=os.getenv("GOOGLE_CLOUD_PROJECT"),
         location=os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1"),
     )
-    model = TextGenerationModel.from_pretrained("text-bison@001")
-    logger.info("Successfully initialized Google AI")
+    
+    # Use your fine-tuned model
+    FINE_TUNED_MODEL = os.getenv("FINE_TUNED_MODEL_ID", "your-model-id")
+    model = ChatModel.from_pretrained(FINE_TUNED_MODEL)
+    
+    logger.info(f"Successfully initialized fine-tuned model: {FINE_TUNED_MODEL}")
 except Exception as e:
     logger.error(f"Failed to initialize Google AI: {str(e)}")
     raise
@@ -129,15 +133,18 @@ async def chat(
     try:
         start_time = time.time()
         
-        # Format conversation history
-        conversation = "\n".join([
-            f"{msg.role}: {msg.content}" 
-            for msg in request.messages
-        ])
+        # Format conversation history for the fine-tuned model
+        chat = model.start_chat()
         
-        # Get response from Google AI
-        response = model.predict(
-            conversation,
+        # Add all previous messages to the chat
+        for msg in request.messages[:-1]:  # All messages except the last one
+            if msg.role == "user":
+                chat.send_message(msg.content)
+            # We don't need to add assistant messages as they're part of the response
+        
+        # Send the final message and get response
+        response = chat.send_message(
+            request.messages[-1].content,
             temperature=request.temperature,
             max_output_tokens=request.max_tokens,
         )
@@ -148,7 +155,7 @@ async def chat(
         
         usage = {
             "processing_time_ms": round(processing_time * 1000),
-            "prompt_tokens": len(conversation.split()),
+            "prompt_tokens": len(" ".join([m.content for m in request.messages]).split()),
             "completion_tokens": len(response.text.split()),
         }
         
@@ -167,7 +174,8 @@ async def health_check():
     return {
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "model": os.getenv("FINE_TUNED_MODEL_ID", "not-set")
     }
 
 if __name__ == "__main__":
