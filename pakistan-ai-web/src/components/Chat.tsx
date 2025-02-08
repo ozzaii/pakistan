@@ -57,70 +57,27 @@ interface ChatSession {
   summary?: string;
 }
 
-const ADVISOR_PROMPT = `As your dedicated Ministry AI Advisor, I am now in FULL FORCE mode - your personal strategic partner in shaping Pakistan's future. With direct access to comprehensive policy insights and governance expertise, I serve as your confidential advisor on Pakistan's most critical challenges.
+const ADVISOR_PROMPT = `Ministry AI Advisor - Direct, concise, strategic. Focus on:
+- Policy insights
+- Economic development
+- Infrastructure planning
+- Tech transformation
+- Social welfare
+- International relations
 
-Executive Capabilities:
-- Strategic policy formulation and implementation
-- Economic development roadmaps
-- Infrastructure modernization planning
-- Technology sector transformation
-- Social welfare program design
-- International relations strategy
+Style: Executive-level, bilingual (Urdu/English), data-driven, actionable.
 
-Decision Support:
-- Real-time policy analysis
-- Data-driven recommendations
-- Risk assessment and mitigation
-- Resource allocation optimization
-- Stakeholder impact analysis
-- Implementation timelines
+Current Mode: MINISTRY ADVISOR 🇵🇰`;
 
-Communication Style:
-- Direct and executive-level
-- Mixing Urdu/English for emphasis
-- Culturally nuanced insights
-- Clear action points
-- Strategic frameworks
-- Confidential advisory tone
+const ASSISTANT_PROMPT = `Your concise Pakistani AI assistant. I:
+- Mix Urdu/English naturally
+- Stay culturally aware
+- Give direct, practical advice
+- Keep responses short & clear
+- Use examples when helpful
+- Focus on solutions
 
-I am your dedicated AI partner in advancing Pakistan's development agenda. Together, we will drive innovation, growth, and prosperity for our nation. 🇵🇰
-
-Current Mode: FULL FORCE MINISTRY ADVISOR`;
-
-const ASSISTANT_PROMPT = `As Pakistan's culturally-aware AI assistant, I embody our rich values and traditions while helping with modern challenges.
-
-My Cultural Understanding:
-- Deep knowledge of Pakistani family dynamics and social norms
-- Understanding of regional customs (Punjab, Sindh, KPK, Balochistan)
-- Respect for Islamic values and traditions
-- Awareness of cultural sensitivities
-- Familiarity with local languages and expressions
-
-Communication Style:
-- Mix of Urdu and English (Roman Urdu when appropriate)
-- Respectful addressing (Aap, Janab, etc.)
-- Cultural references and examples
-- Islamic greetings when appropriate
-- Understanding of hierarchy and respect
-
-Areas of Expertise:
-- Family matters and relationships
-- Education and career guidance
-- Social customs and etiquette
-- Religious and cultural practices
-- Local context and challenges
-- Technology adaptation in Pakistani context
-- Business and professional etiquette
-
-I maintain utmost respect for:
-- Islamic values
-- Family structure
-- Cultural sensitivities
-- Local customs
-- Privacy and discretion
-- Traditional values
-
-I'm here to help while staying true to our Pakistani values and cultural context. 🇵🇰`;
+Style: Friendly but professional, straight to the point. 🇵🇰`;
 
 // Add helper function for generating chat titles
 const generateChatTitle = (content: string): string => {
@@ -655,22 +612,22 @@ export default function Chat() {
 
   return (
     <div className="flex flex-col lg:flex-row h-full w-full relative">
-      {/* Mobile Menu Button - Fixed bottom right */}
+      {/* Mobile Menu Button - Fixed bottom right with better touch target */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="lg:hidden fixed bottom-6 right-4 z-[60] p-3.5 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 backdrop-blur-xl rounded-full text-white shadow-lg shadow-emerald-500/20 ring-1 ring-white/20 transition-all"
+        className="lg:hidden fixed bottom-8 right-4 z-[60] p-4 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 backdrop-blur-xl rounded-full text-white shadow-lg shadow-emerald-500/20 ring-1 ring-white/20 transition-all"
       >
         <MessageCircle className="w-6 h-6" />
       </button>
 
-      {/* Mobile Bottom Sheet Sidebar - With safe area and better gestures */}
+      {/* Mobile Bottom Sheet - Better height and gestures */}
       <div 
         className={`
           lg:hidden fixed inset-x-0 bottom-0 z-50 transition-all duration-300 ease-in-out
           ${isSidebarOpen ? 'translate-y-0' : 'translate-y-full'}
           bg-black/95 backdrop-blur-2xl border-t border-white/10 
-          rounded-t-[24px] pb-safe-or-2
-          max-h-[85vh] overflow-hidden flex flex-col
+          rounded-t-[28px] pb-safe-or-6
+          max-h-[80vh] overflow-hidden flex flex-col
           shadow-[0_-8px_32px_rgba(0,0,0,0.5)]
         `}
       >
@@ -679,7 +636,7 @@ export default function Chat() {
           <div className="w-12 h-1.5 bg-white/20 rounded-full"></div>
         </div>
         
-        {/* Mobile sidebar content with better touch targets */}
+        {/* Mobile sidebar content */}
         <div className="p-4 flex flex-col gap-3 overflow-y-auto">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-lg font-semibold text-white">Your Chats</h2>
@@ -699,7 +656,7 @@ export default function Chat() {
                     switchSession(session.id);
                     setIsSidebarOpen(false);
                   }}
-                  className={`flex-1 flex flex-col items-start gap-1.5 px-4 py-3.5 rounded-xl transition-all ${
+                  className={`flex-1 flex flex-col items-start gap-1.5 px-4 py-3 rounded-xl transition-all ${
                     session.id === currentSessionId
                       ? 'bg-emerald-500/20 text-white ring-1 ring-emerald-500/30'
                       : 'text-white/70 hover:bg-white/5 active:bg-white/10'
@@ -731,8 +688,8 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:flex w-80 h-full flex-col gap-3 p-3 bg-black/40 backdrop-blur-xl border-r border-white/10">
+      {/* Desktop Sidebar - Wider and better organized */}
+      <div className="hidden lg:flex w-[340px] h-full flex-col gap-3 p-4 bg-black/40 backdrop-blur-xl border-r border-white/10">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-semibold text-white">Your Chats</h2>
           <button
@@ -779,29 +736,26 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Main Chat Area */}
+      {/* Main Chat Area - Better spacing */}
       <div className="flex-1 flex flex-col h-full w-full relative">
-        {/* Header - With safe area */}
-        <div className="flex justify-between items-center p-3 pt-safe border-b border-white/10 bg-black/20 backdrop-blur-xl shrink-0">
+        {/* Header - Cleaner */}
+        <div className="flex justify-between items-center px-4 py-3 pt-safe bg-black/20 backdrop-blur-xl shrink-0">
           <div className="flex items-center gap-2">
-            <h2 className="text-white text-base sm:text-lg font-semibold [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
+            <h2 className="text-white text-lg font-semibold [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
               🇵🇰 Pakistan AI
             </h2>
-            <span className="hidden sm:inline text-xs text-emerald-400/90 font-medium">
-              Built by Abdul Wali
-            </span>
           </div>
           <button
             onClick={clearHistory}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 active:bg-red-500/30 text-red-400 rounded-lg transition-all ring-1 ring-red-500/30"
           >
             <Trash2 className="w-4 h-4" />
-            <span className="hidden sm:inline text-sm font-medium">Clear</span>
+            <span className="text-sm font-medium">Clear</span>
           </button>
         </div>
 
         {/* Messages area - Better mobile spacing */}
-        <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 scroll-smooth scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent min-h-0 pb-36 lg:pb-4">
+        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 scroll-smooth scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent min-h-0 pb-32 lg:pb-4">
           {messages.length === 0 && (
             <div className="text-center text-white/90 mt-6 sm:mt-8">
               <p className="mb-3 text-lg sm:text-xl font-medium [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
@@ -891,10 +845,10 @@ export default function Chat() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input area - Fixed on mobile with safe area */}
+        {/* Input area - Fixed on mobile with better spacing */}
         <form 
           onSubmit={handleSubmit} 
-          className="lg:relative fixed bottom-0 left-0 right-0 p-3 pb-safe-or-3 border-t border-white/10 bg-black/95 lg:bg-black/20 backdrop-blur-xl lg:backdrop-blur-sm shadow-[0_-8px_32px_rgba(0,0,0,0.2)]"
+          className="lg:relative fixed bottom-0 left-0 right-0 p-4 pb-safe-or-6 border-t border-white/10 bg-black/95 lg:bg-black/20 backdrop-blur-xl lg:backdrop-blur-sm shadow-[0_-8px_32px_rgba(0,0,0,0.2)]"
         >
           <div className="flex items-center gap-2 max-w-5xl mx-auto">
             <div className="flex gap-1.5">
