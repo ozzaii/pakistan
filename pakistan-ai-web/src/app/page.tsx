@@ -16,26 +16,38 @@ export default function Home() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
-      className="min-h-screen bg-gradient-to-br from-emerald-900 via-emerald-800 to-green-900 relative overflow-hidden selection:bg-emerald-500/30"
+      className="min-h-[100dvh] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-800 via-emerald-900 to-gray-900 relative overflow-hidden selection:bg-emerald-500/30"
     >
-      {/* Background pattern with optimized rendering */}
+      {/* Optimized background pattern */}
       <motion.div 
         initial={{ opacity: 0 }}
-        animate={{ opacity: 0.03 }}
+        animate={{ opacity: 0.02 }}
         transition={{ duration: 1.2, delay: 0.2 }}
-        className="absolute inset-0 bg-[url('/pattern.svg')] pointer-events-none" 
+        className="fixed inset-0 bg-[url('/pattern.svg')] bg-repeat pointer-events-none mix-blend-soft-light" 
       />
       
-      <Toaster position="top-center" />
+      {/* Subtle gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/5 to-black/10 pointer-events-none" />
       
-      {/* Hero Section - Staggered animations */}
+      <Toaster 
+        position="top-center"
+        toastOptions={{
+          style: {
+            background: 'rgba(0, 0, 0, 0.8)',
+            color: '#fff',
+            backdropFilter: 'blur(8px)',
+          },
+        }} 
+      />
+      
+      {/* Hero Section - Clean & minimal */}
       <div className="relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
           <div className="text-center space-y-4">
             <motion.h1 
               {...fadeInUp}
               transition={{ ...fadeInUp.transition, delay: 0.3 }}
-              className="text-4xl sm:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-emerald-200"
+              className="text-4xl sm:text-6xl font-bold text-white"
             >
               Pakistan AI <span className="text-emerald-400">Assistant</span>
             </motion.h1>
@@ -50,7 +62,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Chat Interface - Fade in with delay */}
+      {/* Chat Interface - Clean container */}
       <motion.div 
         {...fadeInUp}
         transition={{ ...fadeInUp.transition, delay: 0.5 }}
@@ -59,12 +71,12 @@ export default function Home() {
         <Chat />
       </motion.div>
 
-      {/* Footer - Subtle fade in */}
+      {/* Footer - Minimal */}
       <motion.footer 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8, delay: 0.6 }}
-        className="text-center py-5 sm:py-6 text-emerald-100/60 text-sm font-medium"
+        className="text-center py-5 sm:py-6 text-emerald-50/50 text-sm font-medium"
       >
         <p>Built with ❤️ for Pakistan</p>
       </motion.footer>
