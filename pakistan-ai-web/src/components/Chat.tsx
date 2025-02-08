@@ -655,39 +655,39 @@ export default function Chat() {
 
   return (
     <div className="flex flex-col lg:flex-row h-[100dvh] w-full max-w-6xl mx-auto relative">
-      {/* Mobile Menu Button - Adjusted z-index and positioning */}
+      {/* Mobile Menu Button - Premium styling */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="lg:hidden fixed top-4 left-4 z-[60] p-2.5 bg-emerald-600/90 rounded-lg text-white shadow-lg hover:bg-emerald-600 active:bg-emerald-700 transition-colors"
+        className="lg:hidden fixed top-4 left-4 z-[60] p-2.5 bg-black/20 hover:bg-black/30 active:bg-black/40 backdrop-blur-lg rounded-xl text-white shadow-lg ring-1 ring-white/10 transition-all"
       >
         <MessageCircle className="w-5 h-5" />
       </button>
 
-      {/* Sidebar - Improved mobile styling */}
+      {/* Sidebar - Premium glass morphism */}
       <div className={`${
         isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
       } lg:translate-x-0 fixed lg:relative w-72 h-[100dvh] z-50 transition-transform duration-300 ease-in-out
-      bg-gradient-to-b from-black/80 to-black/60 backdrop-blur-md lg:backdrop-blur-lg border-r border-white/10 lg:rounded-l-2xl p-4 flex flex-col gap-4`}>
+      bg-black/40 backdrop-blur-xl lg:backdrop-blur-2xl border-r border-white/10 p-4 flex flex-col gap-4`}>
         <button
           onClick={createNewChat}
-          className="w-full flex items-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-white rounded-xl transition-all shadow-lg shadow-emerald-500/20 ring-1 ring-white/20"
         >
           <PlusCircle className="w-5 h-5" />
           New Chat
         </button>
         
-        <div className="flex-1 overflow-y-auto space-y-2">
+        <div className="flex-1 overflow-y-auto space-y-2 pr-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
           {sessions.map(session => (
             <div key={session.id} className="flex items-center gap-2 group">
               <button
                 onClick={() => {
                   switchSession(session.id);
-                  setIsSidebarOpen(false); // Close sidebar on mobile after selection
+                  setIsSidebarOpen(false);
                 }}
-                className={`flex-1 flex flex-col items-start gap-1 px-4 py-3 rounded-lg transition-colors ${
+                className={`flex-1 flex flex-col items-start gap-1 px-4 py-3 rounded-xl transition-all ${
                   session.id === currentSessionId
-                    ? 'bg-emerald-600 text-white'
-                    : 'text-white text-opacity-80 hover:bg-white hover:bg-opacity-10'
+                    ? 'bg-emerald-500/20 text-white ring-1 ring-emerald-500/30'
+                    : 'text-white/70 hover:bg-white/5 active:bg-white/10'
                 }`}
               >
                 <div className="flex items-center gap-2 w-full">
@@ -705,7 +705,7 @@ export default function Chat() {
               </button>
               <button
                 onClick={() => deleteSession(session.id)}
-                className="opacity-0 group-hover:opacity-100 p-2 text-white hover:bg-red-500 rounded-lg transition-all"
+                className="opacity-0 group-hover:opacity-100 p-2 text-white/70 hover:text-white hover:bg-red-500/20 active:bg-red-500/30 rounded-lg transition-all"
                 title="Delete chat"
               >
                 <Trash2 className="w-4 h-4" />
@@ -715,30 +715,36 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Main Chat Area - Fixed mobile layout */}
-      <div className="flex-1 flex flex-col h-[100dvh] w-full bg-gradient-to-b from-black/60 to-black/40 backdrop-blur-md lg:rounded-r-2xl relative">
-        {/* Header - Improved mobile spacing */}
-        <div className="flex justify-between items-center p-3 sm:p-4 border-b border-white/10 bg-black/20">
+      {/* Main Chat Area - Premium container */}
+      <div className="flex-1 flex flex-col h-[100dvh] w-full relative">
+        {/* Header - Glass effect */}
+        <div className="flex justify-between items-center p-3 sm:p-4 border-b border-white/10 bg-black/20 backdrop-blur-xl">
           <div className="flex items-center gap-2 ml-14 lg:ml-0">
-            <h2 className="text-white text-lg font-semibold">🇵🇰 Pakistan AI</h2>
-            <span className="hidden sm:inline text-xs text-emerald-400 font-medium">Built by Abdul Wali</span>
+            <h2 className="text-white text-lg font-semibold [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
+              🇵🇰 Pakistan AI
+            </h2>
+            <span className="hidden sm:inline text-xs text-emerald-400/90 font-medium">
+              Built by Abdul Wali
+            </span>
           </div>
           <button
             onClick={clearHistory}
-            className="flex items-center gap-1 px-2 sm:px-3 py-1.5 bg-red-500/80 text-white rounded-lg hover:bg-red-500 active:bg-red-600 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 active:bg-red-500/30 text-red-400 rounded-lg transition-all ring-1 ring-red-500/30"
           >
             <Trash2 className="w-4 h-4" />
-            <span className="hidden sm:inline">Clear</span>
+            <span className="hidden sm:inline text-sm font-medium">Clear</span>
           </button>
         </div>
 
-        {/* Messages area - Better mobile spacing and initial scroll position */}
-        <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-4 scroll-smooth">
+        {/* Messages area - Premium scrolling */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6 scroll-smooth scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
           {messages.length === 0 && (
             <div className="text-center text-white/90 mt-8 sm:mt-12">
-              <p className="mb-3 text-xl font-medium">السَّلامُ عَلَيْكُم 👋</p>
+              <p className="mb-3 text-xl font-medium [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
+                السَّلامُ عَلَيْكُم 👋
+              </p>
               <p className="text-lg mb-6">How may I assist you today?</p>
-              <div className="max-w-sm mx-auto text-sm bg-gradient-to-b from-white/10 to-white/5 rounded-xl p-4 shadow-xl border border-white/10">
+              <div className="max-w-sm mx-auto text-sm bg-black/20 backdrop-blur-lg rounded-xl p-4 shadow-xl ring-1 ring-white/10">
                 <p className="mb-2 text-emerald-400 font-medium">You can:</p>
                 <ul className="space-y-2 text-white/80">
                   <li className="flex items-center gap-2">
@@ -767,32 +773,32 @@ export default function Chat() {
                 className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} group`}
               >
                 <div
-                  className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-3 sm:px-4 py-2 ${
+                  className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-4 py-3 ${
                     message.role === 'user'
-                      ? 'bg-emerald-600 text-white'
+                      ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 ring-1 ring-white/20'
                       : message.error
-                      ? 'bg-red-500 bg-opacity-20 text-white'
-                      : 'bg-white bg-opacity-20 text-white'
-                  } relative group-hover:shadow-lg transition-all duration-200`}
+                      ? 'bg-red-500/10 text-white ring-1 ring-red-500/30'
+                      : 'bg-black/20 text-white backdrop-blur-sm ring-1 ring-white/10'
+                  } relative group-hover:shadow-xl transition-all duration-200`}
                 >
                   {message.content}
                   {message.generatedFile && (
-                    <div className="mt-2 flex items-center gap-2">
+                    <div className="mt-3 flex items-center gap-2">
                       <button
                         onClick={() => handleDownload(
                           message.generatedFile!.content,
                           message.generatedFile!.name,
                           message.generatedFile!.type
                         )}
-                        className="flex items-center gap-1 text-xs bg-emerald-500 hover:bg-emerald-600 px-2 py-1 rounded transition-colors"
+                        className="flex items-center gap-1.5 text-xs bg-emerald-500/20 hover:bg-emerald-500/30 active:bg-emerald-500/40 text-emerald-400 px-3 py-1.5 rounded-lg transition-all ring-1 ring-emerald-500/30"
                       >
-                        <Download className="w-3 h-3" />
+                        <Download className="w-3.5 h-3.5" />
                         Download {message.generatedFile.name}
                       </button>
                     </div>
                   )}
                   {message.timestamp && (
-                    <div className="text-xs opacity-0 group-hover:opacity-50 mt-1 transition-opacity">
+                    <div className="text-xs opacity-0 group-hover:opacity-60 mt-1.5 transition-opacity">
                       {new Date(message.timestamp).toLocaleString('en-US', {
                         month: 'short',
                         day: 'numeric',
@@ -810,7 +816,7 @@ export default function Chat() {
                 animate={{ opacity: 1, y: 0 }}
                 className="flex justify-start"
               >
-                <div className="bg-white bg-opacity-20 rounded-2xl px-4 py-2">
+                <div className="bg-black/20 backdrop-blur-sm rounded-2xl px-4 py-3 ring-1 ring-white/10">
                   <Loader2 className="w-5 h-5 animate-spin text-white" />
                 </div>
               </motion.div>
@@ -819,14 +825,14 @@ export default function Chat() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input area - Enhanced mobile styling */}
-        <form onSubmit={handleSubmit} className="p-2 sm:p-4 border-t border-white/10 bg-black/30">
-          <div className="flex items-center gap-1.5 sm:gap-2">
+        {/* Input area - Premium controls */}
+        <form onSubmit={handleSubmit} className="p-4 border-t border-white/10 bg-black/20 backdrop-blur-xl">
+          <div className="flex items-center gap-2">
             <div className="flex gap-1.5">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="p-2.5 text-white hover:bg-white/10 active:bg-white/20 rounded-lg transition"
+                className="p-2.5 text-white/80 hover:text-white hover:bg-white/10 active:bg-white/20 rounded-xl transition-all ring-1 ring-white/10"
                 title="Upload"
               >
                 <FileUp className="w-5 h-5" />
@@ -835,8 +841,10 @@ export default function Chat() {
                 type="button"
                 onClick={handleSearch}
                 disabled={isLoading}
-                className={`p-2.5 text-white hover:bg-white/10 active:bg-white/20 rounded-lg transition ${
-                  isSearching ? 'bg-emerald-600' : ''
+                className={`p-2.5 text-white/80 hover:text-white transition-all rounded-xl ring-1 ring-white/10 ${
+                  isSearching 
+                    ? 'bg-emerald-500/20 text-emerald-400 ring-emerald-500/30' 
+                    : 'hover:bg-white/10 active:bg-white/20'
                 }`}
                 title={isSearching ? "Search" : "Web Search"}
               >
@@ -854,7 +862,7 @@ export default function Chat() {
                   ? "Search..." 
                   : "Type message..."
               }
-              className="flex-1 bg-white/10 text-white placeholder-white/50 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/70 text-sm sm:text-base"
+              className="flex-1 bg-black/20 text-white placeholder-white/50 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ring-1 ring-white/10 text-sm sm:text-base transition-all"
               disabled={isLoading}
             />
             {error ? (
@@ -862,7 +870,7 @@ export default function Chat() {
                 type="button"
                 onClick={handleRetry}
                 disabled={isLoading || retryCount >= 3}
-                className="p-2.5 text-white hover:bg-white/10 active:bg-white/20 rounded-lg transition disabled:opacity-50"
+                className="p-2.5 text-white/80 hover:text-white hover:bg-white/10 active:bg-white/20 rounded-xl transition-all ring-1 ring-white/10 disabled:opacity-50"
                 title="Retry"
               >
                 <RefreshCcw className="w-5 h-5" />
@@ -871,7 +879,7 @@ export default function Chat() {
               <button
                 type="submit"
                 disabled={isLoading || !input.trim()}
-                className="p-2.5 text-white hover:bg-white/10 active:bg-white/20 rounded-lg transition disabled:opacity-50"
+                className="p-2.5 text-white/80 hover:text-white hover:bg-emerald-500/20 active:bg-emerald-500/30 rounded-xl transition-all ring-1 ring-white/10 disabled:opacity-50 disabled:hover:bg-transparent"
               >
                 <Send className="w-5 h-5" />
               </button>
@@ -879,15 +887,15 @@ export default function Chat() {
           </div>
           {/* Improved error and file indicators */}
           {(pendingFile || error) && (
-            <div className="mt-2 text-xs flex items-center gap-2">
+            <div className="mt-2 text-xs flex items-center gap-3">
               {pendingFile && (
-                <span className="text-emerald-300 flex items-center gap-1">
+                <span className="text-emerald-400/90 flex items-center gap-1.5 bg-emerald-500/10 px-2 py-1 rounded-lg ring-1 ring-emerald-500/30">
                   <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
                   File ready
                 </span>
               )}
               {error && (
-                <span className="text-red-300 flex items-center gap-1">
+                <span className="text-red-400/90 flex items-center gap-1.5 bg-red-500/10 px-2 py-1 rounded-lg ring-1 ring-red-500/30">
                   <AlertCircle className="w-4 h-4" />
                   {error}
                 </span>
@@ -903,10 +911,10 @@ export default function Chat() {
           />
         </form>
 
-        {/* Mobile backdrop - Improved blur and opacity */}
+        {/* Mobile backdrop - Premium blur */}
         {isSidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 lg:hidden"
+            className="fixed inset-0 bg-black/60 backdrop-blur-md z-40 lg:hidden"
             onClick={() => setIsSidebarOpen(false)}
           />
         )}
