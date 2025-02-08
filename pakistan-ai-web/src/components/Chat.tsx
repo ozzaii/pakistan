@@ -53,6 +53,8 @@ interface ChatSession {
   messages: Message[];
   createdAt: Date;
   lastUpdated: Date;
+  context?: string;
+  summary?: string;
 }
 
 const ADVISOR_PROMPT = `As your dedicated Ministry AI Advisor, I am now in FULL FORCE mode - your personal strategic partner in shaping Pakistan's future. With direct access to comprehensive policy insights and governance expertise, I serve as your confidential advisor on Pakistan's most critical challenges.
@@ -120,6 +122,26 @@ I maintain utmost respect for:
 
 I'm here to help while staying true to our Pakistani values and cultural context. 🇵🇰`;
 
+// Add helper function for generating chat titles
+const generateChatTitle = (content: string): string => {
+  // Remove special characters and extra spaces
+  const cleaned = content.replace(/[^\w\s]/gi, ' ').trim();
+  // Get first 5-8 meaningful words
+  const words = cleaned.split(/\s+/).filter(word => word.length > 2);
+  const titleWords = words.slice(0, 6);
+  const title = titleWords.join(' ');
+  return title.length > 40 ? title.substring(0, 40) + '...' : title;
+};
+
+// Add function to generate chat context
+const generateChatContext = (messages: Message[]): string => {
+  // Take last 3 message pairs for context
+  const contextMessages = messages.slice(-6);
+  return contextMessages.map(msg => 
+    `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`
+  ).join('\n\n');
+};
+
 export default function Chat() {
   const [sessions, setSessions] = useState<ChatSession[]>(() => {
     if (typeof window !== 'undefined') {
@@ -165,16 +187,23 @@ export default function Chat() {
   }, [currentSessionId, sessions]);
 
   useEffect(() => {
-    setSessions(prev => prev.map(session => 
-      session.id === currentSessionId
-        ? {
-            ...session,
-            messages,
-            lastUpdated: new Date(),
-            title: messages[0]?.content.slice(0, 30) || 'New Chat'
-          }
-        : session
-    ));
+    setSessions(prev => prev.map(session => {
+      if (session.id === currentSessionId) {
+        const context = generateChatContext(messages);
+        const title = messages[0]?.content 
+          ? generateChatTitle(messages[0].content)
+          : 'New Chat';
+        
+        return {
+          ...session,
+          messages,
+          lastUpdated: new Date(),
+          title,
+          context
+        };
+      }
+      return session;
+    }));
   }, [messages, currentSessionId]);
 
   const createNewChat = () => {
@@ -350,6 +379,9 @@ export default function Chat() {
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-001:generateContent?key=${apiKey}`;
 
+    const currentSession = sessions.find(s => s.id === currentSessionId);
+    const chatContext = currentSession?.context || '';
+
     if (content.toLowerCase().includes('wali123456')) {
       setIsAdvisor(true);
       content = content.replace(/wali123456/gi, '').trim();
@@ -359,7 +391,7 @@ export default function Chat() {
     }
 
     const systemPrompt = isAdvisor ? ADVISOR_PROMPT : ASSISTANT_PROMPT;
-    const fullPrompt = `${systemPrompt}\n\nUser: ${content}\nAssistant:`;
+    const fullPrompt = `${systemPrompt}\n\n${chatContext ? `Previous Context:\n${chatContext}\n\n` : ''}User: ${content}\nAssistant:`;
     
     const payload: GeminiPayload = {
       contents: [{
@@ -612,14 +644,24 @@ export default function Chat() {
             <div key={session.id} className="flex items-center gap-2 group">
               <button
                 onClick={() => switchSession(session.id)}
-                className={`flex-1 flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                className={`flex-1 flex flex-col items-start gap-1 px-4 py-2 rounded-lg transition-colors ${
                   session.id === currentSessionId
                     ? 'bg-emerald-600 text-white'
                     : 'text-white text-opacity-80 hover:bg-white hover:bg-opacity-10'
                 }`}
               >
-                <MessageCircle className="w-4 h-4 flex-shrink-0" />
-                <span className="truncate text-left text-sm">{session.title}</span>
+                <div className="flex items-center gap-2 w-full">
+                  <MessageCircle className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate text-left text-sm font-medium">{session.title}</span>
+                </div>
+                <span className="text-xs opacity-60 truncate w-full">
+                  {new Date(session.lastUpdated).toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </span>
               </button>
               <button
                 onClick={() => deleteSession(session.id)}
