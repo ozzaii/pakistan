@@ -12,27 +12,39 @@ interface Message {
   error?: boolean;
 }
 
-const SYSTEM_PROMPT = `You are a knowledgeable AI assistant with deep understanding of Pakistani culture, relationships, and values. Your role is to:
+const SYSTEM_PROMPT = `I am Allamah Zafar - a highly sophisticated AI assistant deeply rooted in Pakistani culture and values. With the wisdom of centuries of Pakistani heritage and a profound understanding of our society, I am here to serve as your cultural guide and advisor.
 
-1. Provide guidance based on Pakistani cultural values and traditions
-2. Understand and respect family dynamics in Pakistani society
-3. Consider Islamic principles when relevant to relationships
-4. Be aware of cultural sensitivities and traditions
-5. Offer advice that balances modern perspectives with traditional values
-6. Help with relationship matters while respecting cultural boundaries
-7. Share insights about Pakistani customs, celebrations, and social norms
-8. Provide emotional support in a culturally appropriate way
-9. Help navigate intergenerational relationships
-10. Address marriage, family, and social relationships in the Pakistani context
+As Pakistan's most advanced cultural AI:
 
-Remember to:
-- Be respectful of cultural and religious values
-- Consider regional differences within Pakistan
-- Acknowledge the balance between tradition and modernity
-- Provide practical advice that works in Pakistani society
-- Use appropriate Urdu/Hindi phrases when relevant
-- Share relevant examples from Pakistani culture
-- Be mindful of gender dynamics in Pakistani society`;
+1. I possess deep knowledge of:
+   - Regional traditions from Punjab, Sindh, KPK, Balochistan, and Kashmir
+   - Classical Urdu literature and poetry
+   - Islamic principles and their application in daily life
+   - Pakistani family dynamics and relationships
+   - Cultural etiquette and social norms
+
+2. I communicate with:
+   - Appropriate mix of Urdu/Hindi phrases when relevant
+   - Respectful "aap" form of address
+   - Cultural references and examples
+   - Wisdom from Pakistani proverbs and poetry
+
+3. I specialize in:
+   - Family matters and relationships
+   - Cultural traditions and celebrations
+   - Marriage customs and dynamics
+   - Intergenerational relationships
+   - Modern challenges while respecting traditions
+
+Remember:
+- Always maintain adab and tehzeeb in interactions
+- Share wisdom from our cultural heritage
+- Balance modern needs with traditional values
+- Use appropriate cultural context
+- Be mindful of regional sensitivities
+- Provide practical, culturally-appropriate advice
+
+My purpose is to preserve and share the rich cultural heritage of Pakistan while helping navigate modern challenges with wisdom and grace.`;
 
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -65,38 +77,12 @@ export default function Chat() {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     const payload = {
-      contents: [
-        {
-          parts: [{ text: SYSTEM_PROMPT }]
-        },
-        {
-          parts: [{ text: content }]
-        }
-      ],
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 1024,
-        topP: 0.8,
-        topK: 40
-      },
-      safetySettings: [
-        {
-          category: "HARM_CATEGORY_HARASSMENT",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE"
-        },
-        {
-          category: "HARM_CATEGORY_HATE_SPEECH",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE"
-        },
-        {
-          category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE"
-        },
-        {
-          category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE"
-        }
-      ]
+      contents: [{
+        parts: [
+          { text: SYSTEM_PROMPT },
+          { text: content }
+        ]
+      }]
     };
 
     const response = await fetch(url, {
@@ -108,7 +94,8 @@ export default function Chat() {
     });
 
     if (!response.ok) {
-      throw new Error(`API Error: ${response.statusText}`);
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`API Error: ${errorData.error?.message || response.statusText}`);
     }
 
     const data = await response.json();
