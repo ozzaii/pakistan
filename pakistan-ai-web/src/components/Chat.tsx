@@ -83,7 +83,7 @@ export default function Chat() {
 
   const callGeminiAPI = async (content: string) => {
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-001:generateContent?key=${apiKey}`;
 
     // Check for special code and update mode
     if (content.toLowerCase().includes('wali123456')) {
@@ -104,8 +104,28 @@ export default function Chat() {
         temperature: 0.7,
         topK: 40,
         topP: 0.8,
-        maxOutputTokens: 1024,
-      }
+        maxOutputTokens: 2048,
+        candidateCount: 1,
+        stopSequences: ["User:", "Human:"]
+      },
+      safetySettings: [
+        {
+          category: "HARM_CATEGORY_HARASSMENT",
+          threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        },
+        {
+          category: "HARM_CATEGORY_HATE_SPEECH",
+          threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        },
+        {
+          category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+          threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        },
+        {
+          category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+          threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        }
+      ]
     };
 
     try {
