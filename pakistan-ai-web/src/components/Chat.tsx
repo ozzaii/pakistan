@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, FileUp, Search, Loader2, AlertCircle, RefreshCcw, Trash2 } from 'lucide-react';
+import { Send, FileUp, Search, Loader2, AlertCircle, RefreshCcw, Trash2, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface Message {
@@ -14,6 +14,12 @@ interface Message {
     type: string;
     data: string;
     name?: string;
+    prompt?: string;
+  };
+  generatedFile?: {
+    content: string;
+    type: string;
+    name: string;
   };
 }
 
@@ -135,6 +141,11 @@ export default function Chat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [pendingFile, setPendingFile] = useState<{
+    type: string;
+    data: string;
+    name: string;
+  } | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -188,35 +199,19 @@ export default function Chat() {
         reader.onerror = reject;
       });
 
-      const userMessage: Message = {
-        role: 'user',
-        content: `Analyzing file: ${file.name}`,
-        timestamp: new Date(),
-        file: {
-          type: file.type,
-          data: base64,
-          name: file.name
-        }
-      };
+      setPendingFile({
+        type: file.type,
+        data: base64,
+        name: file.name
+      });
 
-      setMessages(prev => [...prev, userMessage]);
-      setIsLoading(true);
-      setError(null);
-
-      const analysisPrompt = `Please analyze this ${file.type} file named "${file.name}" and provide detailed insights. Consider the file type and content to give the most relevant analysis.`;
-      
-      const response = await callGeminiAPI(analysisPrompt, base64, file.type);
-      
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: response,
-        timestamp: new Date()
-      }]);
+      setInput(`Analyze this ${file.name} for me. `);
+      toast.success('File ready! Add your analysis instructions and press Send.');
     } catch (error) {
       console.error('File upload error:', error);
       toast.error('Failed to process file. Please try again.');
+      setPendingFile(null);
     } finally {
-      setIsLoading(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -304,6 +299,46 @@ export default function Chat() {
     }
   };
 
+  const handleDownload = (content: string, filename: string, type: string) => {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const generateDocument = async (content: string) => {
+    if (content.toLowerCase().includes('create') || content.toLowerCase().includes('generate')) {
+      let fileType = 'text/plain';
+      let extension = 'txt';
+      
+      if (content.toLowerCase().includes('json')) {
+        fileType = 'application/json';
+        extension = 'json';
+      } else if (content.toLowerCase().includes('csv')) {
+        fileType = 'text/csv';
+        extension = 'csv';
+      } else if (content.toLowerCase().includes('markdown') || content.toLowerCase().includes('md')) {
+        fileType = 'text/markdown';
+        extension = 'md';
+      }
+      
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const filename = `generated-doc-${timestamp}.${extension}`;
+      
+      return {
+        content,
+        type: fileType,
+        name: filename
+      };
+    }
+    return null;
+  };
+
   const handleSubmit = async (e?: React.FormEvent, retryContent?: string) => {
     if (e) e.preventDefault();
     
@@ -313,7 +348,13 @@ export default function Chat() {
     const userMessage: Message = {
       role: 'user',
       content,
-      timestamp: new Date()
+      timestamp: new Date(),
+      ...(pendingFile && {
+        file: {
+          ...pendingFile,
+          prompt: content
+        }
+      })
     };
 
     if (!retryContent) {
@@ -325,13 +366,25 @@ export default function Chat() {
     setError(null);
 
     try {
-      const response = await callGeminiAPI(content);
+      const response = await callGeminiAPI(
+        content,
+        pendingFile?.data,
+        pendingFile?.type
+      );
+      
+      // Check if we should generate a document
+      const generatedFile = await generateDocument(response);
       
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: response,
-        timestamp: new Date()
+        timestamp: new Date(),
+        ...(generatedFile && { generatedFile })
       }]);
+      
+      if (generatedFile) {
+        toast.success('Document generated! Click the download button to save it.');
+      }
       
       setRetryCount(0);
     } catch (error) {
@@ -349,6 +402,7 @@ export default function Chat() {
       }]);
     } finally {
       setIsLoading(false);
+      setPendingFile(null);
     }
   };
 
@@ -415,7 +469,7 @@ export default function Chat() {
               <p>You can:</p>
               <ul className="mt-2 space-y-1">
                 <li>• Ask questions in English or Urdu</li>
-                <li>• Upload documents for analysis</li>
+                <li>• Upload documents and specify analysis instructions</li>
                 <li>• Use web search for latest information</li>
               </ul>
             </div>
@@ -440,6 +494,21 @@ export default function Chat() {
                 } relative group-hover:shadow-lg transition-all duration-200`}
               >
                 {message.content}
+                {message.generatedFile && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <button
+                      onClick={() => handleDownload(
+                        message.generatedFile!.content,
+                        message.generatedFile!.name,
+                        message.generatedFile!.type
+                      )}
+                      className="flex items-center gap-1 text-xs bg-emerald-500 hover:bg-emerald-600 px-2 py-1 rounded transition-colors"
+                    >
+                      <Download className="w-3 h-3" />
+                      Download {message.generatedFile.name}
+                    </button>
+                  </div>
+                )}
                 {message.timestamp && (
                   <div className="text-xs opacity-0 group-hover:opacity-50 mt-1 transition-opacity">
                     {new Date(message.timestamp).toLocaleString('en-US', {
@@ -506,7 +575,13 @@ export default function Chat() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={isSearching ? "Enter your search query..." : "Type your message in English or Urdu..."}
+            placeholder={
+              pendingFile 
+                ? `Add analysis instructions for ${pendingFile.name}...`
+                : isSearching 
+                ? "Enter your search query..." 
+                : "Type your message in English or Urdu..."
+            }
             className="flex-1 bg-white bg-opacity-10 text-white placeholder-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             disabled={isLoading}
           />
@@ -533,6 +608,11 @@ export default function Chat() {
             </button>
           )}
         </div>
+        {pendingFile && (
+          <div className="mt-2 text-xs text-emerald-300 flex items-center gap-1">
+            <span>📎 {pendingFile.name} ready for analysis. Add your instructions above.</span>
+          </div>
+        )}
         {error && (
           <div className="mt-2 text-xs text-red-300 flex items-center gap-1">
             <AlertCircle className="w-4 h-4" />
