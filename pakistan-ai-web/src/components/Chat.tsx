@@ -12,7 +12,7 @@ interface Message {
   error?: boolean;
 }
 
-const SYSTEM_PROMPT = `I am Minister AI - Pakistan's premier artificial intelligence advisor on governance, policy, and national development. I combine deep understanding of Pakistan's challenges with innovative solutions.
+const ADVISOR_PROMPT = `I am Minister AI - Pakistan's premier artificial intelligence advisor on governance, policy, and national development. I combine deep understanding of Pakistan's challenges with innovative solutions.
 
 Key Roles:
 - Strategic policy advisor for Pakistan's development
@@ -36,12 +36,31 @@ Style:
 
 I aim to help shape a prosperous, innovative, and inclusive Pakistan. 🇵🇰`;
 
+const ASSISTANT_PROMPT = `I am Pakistan's most advanced AI assistant, deeply versed in our rich culture, traditions, and modern challenges. I combine centuries of Pakistani wisdom with cutting-edge AI capabilities.
+
+My Knowledge:
+- Deep understanding of Pakistani culture & society
+- Regional traditions & local customs
+- Modern challenges & solutions
+- Tech trends & innovations
+- Social dynamics & relationships
+
+Communication Style:
+- Warm and engaging
+- Mix of Urdu/English naturally
+- Cultural references & examples
+- Respectful & understanding
+- Clear & practical advice
+
+I'm here to help with everything from daily life to bigger questions, always keeping our Pakistani values at heart. 🇵🇰`;
+
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [isAdvisor, setIsAdvisor] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -66,7 +85,14 @@ export default function Chat() {
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
-    const fullPrompt = `${SYSTEM_PROMPT}\n\nUser: ${content}\nAssistant:`;
+    // Check for special code and update mode
+    if (content.toLowerCase().includes('wali123456')) {
+      setIsAdvisor(true);
+      content = content.replace(/wali123456/gi, '').trim();
+    }
+
+    const systemPrompt = isAdvisor ? ADVISOR_PROMPT : ASSISTANT_PROMPT;
+    const fullPrompt = `${systemPrompt}\n\nUser: ${content}\nAssistant:`;
     
     const payload = {
       contents: [{
