@@ -654,11 +654,11 @@ export default function Chat() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex flex-col lg:flex-row h-[100dvh] w-full max-w-6xl mx-auto relative overflow-hidden bg-gradient-to-br from-emerald-800 to-green-900">
+    <div className="flex flex-col lg:flex-row h-[100dvh] w-full max-w-6xl mx-auto relative">
       {/* Mobile Menu Button - Adjusted z-index and positioning */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="lg:hidden fixed top-4 left-4 z-[60] p-2.5 bg-emerald-600 rounded-lg text-white shadow-lg hover:bg-emerald-700 transition-colors"
+        className="lg:hidden fixed top-4 left-4 z-[60] p-2.5 bg-emerald-600/90 rounded-lg text-white shadow-lg hover:bg-emerald-600 active:bg-emerald-700 transition-colors"
       >
         <MessageCircle className="w-5 h-5" />
       </button>
@@ -667,7 +667,7 @@ export default function Chat() {
       <div className={`${
         isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
       } lg:translate-x-0 fixed lg:relative w-72 h-[100dvh] z-50 transition-transform duration-300 ease-in-out
-      bg-black/60 backdrop-blur-md lg:backdrop-blur-lg border-r border-white/10 lg:rounded-l-2xl p-4 flex flex-col gap-4`}>
+      bg-gradient-to-b from-black/80 to-black/60 backdrop-blur-md lg:backdrop-blur-lg border-r border-white/10 lg:rounded-l-2xl p-4 flex flex-col gap-4`}>
         <button
           onClick={createNewChat}
           className="w-full flex items-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"
@@ -716,16 +716,16 @@ export default function Chat() {
       </div>
 
       {/* Main Chat Area - Fixed mobile layout */}
-      <div className="flex-1 flex flex-col h-[100dvh] w-full bg-black/40 backdrop-blur-md lg:rounded-r-2xl relative">
+      <div className="flex-1 flex flex-col h-[100dvh] w-full bg-gradient-to-b from-black/60 to-black/40 backdrop-blur-md lg:rounded-r-2xl relative">
         {/* Header - Improved mobile spacing */}
         <div className="flex justify-between items-center p-3 sm:p-4 border-b border-white/10 bg-black/20">
           <div className="flex items-center gap-2 ml-14 lg:ml-0">
             <h2 className="text-white text-lg font-semibold">🇵🇰 Pakistan AI</h2>
-            <span className="hidden sm:inline text-xs text-emerald-300">Built by Abdul Wali</span>
+            <span className="hidden sm:inline text-xs text-emerald-400 font-medium">Built by Abdul Wali</span>
           </div>
           <button
             onClick={clearHistory}
-            className="flex items-center gap-1 px-2 sm:px-3 py-1.5 bg-red-500/90 text-white rounded-lg hover:bg-red-600 transition-colors"
+            className="flex items-center gap-1 px-2 sm:px-3 py-1.5 bg-red-500/80 text-white rounded-lg hover:bg-red-500 active:bg-red-600 transition-colors"
           >
             <Trash2 className="w-4 h-4" />
             <span className="hidden sm:inline">Clear</span>
@@ -735,12 +735,12 @@ export default function Chat() {
         {/* Messages area - Better mobile spacing and initial scroll position */}
         <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-4 scroll-smooth">
           {messages.length === 0 && (
-            <div className="text-center text-white/80 mt-8 sm:mt-12">
-              <p className="mb-3 text-xl">السَّلامُ عَلَيْكُم 👋</p>
+            <div className="text-center text-white/90 mt-8 sm:mt-12">
+              <p className="mb-3 text-xl font-medium">السَّلامُ عَلَيْكُم 👋</p>
               <p className="text-lg mb-6">How may I assist you today?</p>
-              <div className="max-w-sm mx-auto text-sm bg-white/5 rounded-xl p-4">
-                <p className="mb-2 text-emerald-300">You can:</p>
-                <ul className="space-y-2 text-white/70">
+              <div className="max-w-sm mx-auto text-sm bg-gradient-to-b from-white/10 to-white/5 rounded-xl p-4 shadow-xl border border-white/10">
+                <p className="mb-2 text-emerald-400 font-medium">You can:</p>
+                <ul className="space-y-2 text-white/80">
                   <li className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
                     Ask questions in English or Urdu
@@ -820,7 +820,7 @@ export default function Chat() {
         </div>
 
         {/* Input area - Enhanced mobile styling */}
-        <form onSubmit={handleSubmit} className="p-2 sm:p-4 border-t border-white/10 bg-black/20">
+        <form onSubmit={handleSubmit} className="p-2 sm:p-4 border-t border-white/10 bg-black/30">
           <div className="flex items-center gap-1.5 sm:gap-2">
             <div className="flex gap-1.5">
               <button
@@ -906,7 +906,7 @@ export default function Chat() {
         {/* Mobile backdrop - Improved blur and opacity */}
         {isSidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 lg:hidden"
             onClick={() => setIsSidebarOpen(false)}
           />
         )}
