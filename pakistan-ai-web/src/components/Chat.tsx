@@ -654,20 +654,20 @@ export default function Chat() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen w-full max-w-6xl mx-auto relative">
-      {/* Mobile Menu Button */}
+    <div className="flex flex-col lg:flex-row h-[100dvh] w-full max-w-6xl mx-auto relative overflow-hidden bg-gradient-to-br from-emerald-800 to-green-900">
+      {/* Mobile Menu Button - Adjusted z-index and positioning */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-emerald-600 rounded-lg text-white shadow-lg"
+        className="lg:hidden fixed top-4 left-4 z-[60] p-2.5 bg-emerald-600 rounded-lg text-white shadow-lg hover:bg-emerald-700 transition-colors"
       >
         <MessageCircle className="w-5 h-5" />
       </button>
 
-      {/* Sidebar */}
+      {/* Sidebar - Improved mobile styling */}
       <div className={`${
         isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } lg:translate-x-0 fixed lg:relative w-72 h-full z-40 transition-transform duration-300 ease-in-out
-      bg-black bg-opacity-40 backdrop-blur-lg lg:rounded-l-2xl p-4 flex flex-col gap-4`}>
+      } lg:translate-x-0 fixed lg:relative w-72 h-[100dvh] z-50 transition-transform duration-300 ease-in-out
+      bg-black/60 backdrop-blur-md lg:backdrop-blur-lg border-r border-white/10 lg:rounded-l-2xl p-4 flex flex-col gap-4`}>
         <button
           onClick={createNewChat}
           className="w-full flex items-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"
@@ -715,34 +715,44 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col bg-white bg-opacity-10 backdrop-blur-lg lg:rounded-r-2xl">
-        <div className="flex justify-between items-center p-3 sm:p-4 border-b border-white border-opacity-10">
-          <div className="flex items-center space-x-2">
+      {/* Main Chat Area - Fixed mobile layout */}
+      <div className="flex-1 flex flex-col h-[100dvh] w-full bg-black/40 backdrop-blur-md lg:rounded-r-2xl relative">
+        {/* Header - Improved mobile spacing */}
+        <div className="flex justify-between items-center p-3 sm:p-4 border-b border-white/10 bg-black/20">
+          <div className="flex items-center gap-2 ml-14 lg:ml-0">
             <h2 className="text-white text-lg font-semibold">🇵🇰 Pakistan AI</h2>
             <span className="hidden sm:inline text-xs text-emerald-300">Built by Abdul Wali</span>
           </div>
           <button
             onClick={clearHistory}
-            className="flex items-center px-2 sm:px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+            className="flex items-center gap-1 px-2 sm:px-3 py-1.5 bg-red-500/90 text-white rounded-lg hover:bg-red-600 transition-colors"
           >
             <Trash2 className="w-4 h-4" />
-            <span className="hidden sm:inline ml-1">Clear</span>
+            <span className="hidden sm:inline">Clear</span>
           </button>
         </div>
 
-        {/* Messages area with improved mobile spacing */}
-        <div className="flex-1 overflow-y-auto p-2 sm:p-6 space-y-3 sm:space-y-4">
+        {/* Messages area - Better mobile spacing and initial scroll position */}
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-4 scroll-smooth">
           {messages.length === 0 && (
-            <div className="text-center text-white text-opacity-60">
-              <p className="mb-2">السَّلامُ عَلَيْكُم (Assalam-u-Alaikum) 👋</p>
-              <p>How may I assist you today?</p>
-              <div className="mt-4 text-sm">
-                <p>You can:</p>
-                <ul className="mt-2 space-y-1">
-                  <li>• Ask questions in English or Urdu</li>
-                  <li>• Upload documents and specify analysis instructions</li>
-                  <li>• Use web search for latest information</li>
+            <div className="text-center text-white/80 mt-8 sm:mt-12">
+              <p className="mb-3 text-xl">السَّلامُ عَلَيْكُم 👋</p>
+              <p className="text-lg mb-6">How may I assist you today?</p>
+              <div className="max-w-sm mx-auto text-sm bg-white/5 rounded-xl p-4">
+                <p className="mb-2 text-emerald-300">You can:</p>
+                <ul className="space-y-2 text-white/70">
+                  <li className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
+                    Ask questions in English or Urdu
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
+                    Upload documents for analysis
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
+                    Search for latest information
+                  </li>
                 </ul>
               </div>
             </div>
@@ -809,14 +819,14 @@ export default function Chat() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input area with better mobile spacing */}
-        <form onSubmit={handleSubmit} className="p-2 sm:p-4 border-t border-white border-opacity-10">
-          <div className="flex items-center gap-1 sm:gap-2">
-            <div className="flex gap-1">
+        {/* Input area - Enhanced mobile styling */}
+        <form onSubmit={handleSubmit} className="p-2 sm:p-4 border-t border-white/10 bg-black/20">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="flex gap-1.5">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition"
+                className="p-2.5 text-white hover:bg-white/10 active:bg-white/20 rounded-lg transition"
                 title="Upload"
               >
                 <FileUp className="w-5 h-5" />
@@ -825,7 +835,7 @@ export default function Chat() {
                 type="button"
                 onClick={handleSearch}
                 disabled={isLoading}
-                className={`p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition ${
+                className={`p-2.5 text-white hover:bg-white/10 active:bg-white/20 rounded-lg transition ${
                   isSearching ? 'bg-emerald-600' : ''
                 }`}
                 title={isSearching ? "Search" : "Web Search"}
@@ -833,13 +843,6 @@ export default function Chat() {
                 <Search className="w-5 h-5" />
               </button>
             </div>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileUpload}
-              accept=".pdf,.doc,.docx,.txt,.csv,image/*,application/json"
-              className="hidden"
-            />
             <input
               type="text"
               value={input}
@@ -851,7 +854,7 @@ export default function Chat() {
                   ? "Search..." 
                   : "Type message..."
               }
-              className="flex-1 bg-white bg-opacity-10 text-white placeholder-gray-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+              className="flex-1 bg-white/10 text-white placeholder-white/50 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/70 text-sm sm:text-base"
               disabled={isLoading}
             />
             {error ? (
@@ -859,7 +862,7 @@ export default function Chat() {
                 type="button"
                 onClick={handleRetry}
                 disabled={isLoading || retryCount >= 3}
-                className="p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition disabled:opacity-50"
+                className="p-2.5 text-white hover:bg-white/10 active:bg-white/20 rounded-lg transition disabled:opacity-50"
                 title="Retry"
               >
                 <RefreshCcw className="w-5 h-5" />
@@ -868,17 +871,20 @@ export default function Chat() {
               <button
                 type="submit"
                 disabled={isLoading || !input.trim()}
-                className="p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition disabled:opacity-50"
+                className="p-2.5 text-white hover:bg-white/10 active:bg-white/20 rounded-lg transition disabled:opacity-50"
               >
                 <Send className="w-5 h-5" />
               </button>
             )}
           </div>
-          {/* Compact error and file indicators */}
+          {/* Improved error and file indicators */}
           {(pendingFile || error) && (
-            <div className="mt-2 text-xs flex items-center gap-1">
+            <div className="mt-2 text-xs flex items-center gap-2">
               {pendingFile && (
-                <span className="text-emerald-300">📎 File ready</span>
+                <span className="text-emerald-300 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+                  File ready
+                </span>
               )}
               {error && (
                 <span className="text-red-300 flex items-center gap-1">
@@ -888,12 +894,19 @@ export default function Chat() {
               )}
             </div>
           )}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            accept=".pdf,.doc,.docx,.txt,.csv,image/*,application/json"
+            className="hidden"
+          />
         </form>
 
-        {/* Mobile backdrop */}
+        {/* Mobile backdrop - Improved blur and opacity */}
         {isSidebarOpen && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
             onClick={() => setIsSidebarOpen(false)}
           />
         )}
