@@ -362,19 +362,20 @@ export default function Chat() {
     setIsLoading(true);
 
     try {
-      const searchPrompt = `Please search and provide information about: ${input}\n\nConsider Pakistani context and cultural relevance. Include local perspectives and examples where applicable.`;
+      const searchPrompt = `Web Search Results for: ${input}\n\nPlease provide comprehensive information about this topic, focusing on Pakistani context where relevant. Include:\n- Key facts and details\n- Local perspectives and examples\n- Recent developments\n- Cultural considerations\n- Practical implications`;
+      
       const response = await callGeminiAPI(searchPrompt);
       
       setMessages(prev => [
         ...prev,
         {
           role: 'user',
-          content: `🔍 Searching for: ${input}`,
+          content: `🔍 Web Search: ${input}`,
           timestamp: new Date()
         },
         {
           role: 'assistant',
-          content: response,
+          content: `**Search Results for "${input}"**\n\n${response}`,
           timestamp: new Date()
         }
       ]);
@@ -415,8 +416,7 @@ export default function Chat() {
               <ul className="mt-2 space-y-1">
                 <li>• Ask questions in English or Urdu</li>
                 <li>• Upload documents for analysis</li>
-                <li>• Search for information</li>
-                <li>• Type &quot;wali123456&quot; for Ministry AI mode</li>
+                <li>• Use web search for latest information</li>
               </ul>
             </div>
           </div>
@@ -428,7 +428,7 @@ export default function Chat() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} group`}
             >
               <div
                 className={`max-w-[80%] rounded-2xl px-4 py-2 ${
@@ -437,12 +437,17 @@ export default function Chat() {
                     : message.error
                     ? 'bg-red-500 bg-opacity-20 text-white'
                     : 'bg-white bg-opacity-20 text-white'
-                }`}
+                } relative group-hover:shadow-lg transition-all duration-200`}
               >
                 {message.content}
                 {message.timestamp && (
-                  <div className="text-xs opacity-50 mt-1">
-                    {new Date(message.timestamp).toLocaleTimeString()}
+                  <div className="text-xs opacity-0 group-hover:opacity-50 mt-1 transition-opacity">
+                    {new Date(message.timestamp).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
                   </div>
                 )}
               </div>
@@ -469,19 +474,25 @@ export default function Chat() {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition flex items-center"
+              className="p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition flex items-center relative group"
               title="Upload Document"
             >
               <FileUp className="w-5 h-5" />
+              <span className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                Upload Document
+              </span>
             </button>
             <button
               type="button"
               onClick={handleSearch}
               disabled={isLoading || !input.trim()}
-              className="p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition flex items-center disabled:opacity-50"
-              title="Search Information"
+              className="p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition flex items-center disabled:opacity-50 relative group"
+              title="Web Search"
             >
               <Search className="w-5 h-5" />
+              <span className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                Web Search
+              </span>
             </button>
           </div>
           <input
@@ -513,9 +524,12 @@ export default function Chat() {
             <button
               type="submit"
               disabled={isLoading || !input.trim()}
-              className="p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition disabled:opacity-50"
+              className="p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition disabled:opacity-50 relative group"
             >
               <Send className="w-5 h-5" />
+              <span className="absolute bottom-full mb-2 right-0 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                Send
+              </span>
             </button>
           )}
         </div>
