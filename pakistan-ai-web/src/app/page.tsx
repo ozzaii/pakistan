@@ -16,7 +16,7 @@ export default function Home() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
-      className="h-[100dvh] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-800 via-emerald-900 to-gray-900 relative overflow-hidden selection:bg-emerald-500/30 flex flex-col"
+      className="h-[100dvh] supports-[height:100svh]:h-[100svh] supports-[height:100dvh]:h-[100dvh] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-800 via-emerald-900 to-gray-900 relative overflow-hidden selection:bg-emerald-500/30 flex flex-col"
     >
       {/* Premium background pattern */}
       <motion.div 
@@ -50,7 +50,7 @@ export default function Home() {
       />
       
       {/* Hero Section - Premium & minimal */}
-      <div className="relative shrink-0 py-4 sm:py-6 lg:py-8">
+      <div className="relative shrink-0 py-4 sm:py-6 lg:py-8 pt-safe">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-2 sm:space-y-3">
             <motion.div
@@ -77,7 +77,7 @@ export default function Home() {
       <motion.div 
         {...fadeInUp}
         transition={{ ...fadeInUp.transition, delay: 0.5 }}
-        className="flex-1 w-full min-h-0 px-2 sm:px-4 lg:px-6 pb-2 sm:pb-4 lg:pb-6"
+        className="flex-1 w-full min-h-0 px-2 sm:px-4 lg:px-6 pb-2 sm:pb-4 lg:pb-6 pb-safe"
       >
         <div className="max-w-5xl mx-auto h-full">
           <div className="relative rounded-2xl backdrop-blur-sm ring-1 ring-white/10 shadow-[0_0_1px_1px_rgba(0,0,0,0.1)] h-full overflow-hidden">
@@ -91,7 +91,7 @@ export default function Home() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8, delay: 0.6 }}
-        className="text-center py-2 sm:py-3 shrink-0"
+        className="text-center py-2 sm:py-3 shrink-0 pb-safe"
       >
         <p className="text-xs sm:text-sm font-medium bg-gradient-to-r from-emerald-100/40 to-emerald-50/40 text-transparent bg-clip-text">
           Built with ❤️ for Pakistan
