@@ -495,17 +495,23 @@ export default function Chat() {
   };
 
   const generateDocument = async (content: string) => {
-    if (content.toLowerCase().includes('create') || content.toLowerCase().includes('generate')) {
+    // Check if the content actually looks like a document
+    // Look for structural hints like JSON brackets, CSV commas, or markdown formatting
+    const hasJsonStructure = content.trim().startsWith('{') || content.trim().startsWith('[');
+    const hasCsvStructure = content.includes('\n') && content.split('\n').every(line => line.includes(','));
+    const hasMarkdownStructure = content.includes('#') || content.includes('##') || content.includes('```');
+    
+    if (hasJsonStructure || hasCsvStructure || hasMarkdownStructure) {
       let fileType = 'text/plain';
       let extension = 'txt';
       
-      if (content.toLowerCase().includes('json')) {
+      if (hasJsonStructure) {
         fileType = 'application/json';
         extension = 'json';
-      } else if (content.toLowerCase().includes('csv')) {
+      } else if (hasCsvStructure) {
         fileType = 'text/csv';
         extension = 'csv';
-      } else if (content.toLowerCase().includes('markdown') || content.toLowerCase().includes('md')) {
+      } else if (hasMarkdownStructure) {
         fileType = 'text/markdown';
         extension = 'md';
       }
@@ -644,13 +650,27 @@ export default function Chat() {
     }
   };
 
+  // Add new state for mobile sidebar
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   return (
-    <div className="flex h-[600px] max-w-6xl mx-auto">
+    <div className="flex flex-col lg:flex-row h-screen w-full max-w-6xl mx-auto relative">
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-emerald-600 rounded-lg text-white shadow-lg"
+      >
+        <MessageCircle className="w-5 h-5" />
+      </button>
+
       {/* Sidebar */}
-      <div className="w-64 bg-black bg-opacity-40 backdrop-blur-lg rounded-l-2xl p-4 flex flex-col gap-4">
+      <div className={`${
+        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      } lg:translate-x-0 fixed lg:relative w-72 h-full z-40 transition-transform duration-300 ease-in-out
+      bg-black bg-opacity-40 backdrop-blur-lg lg:rounded-l-2xl p-4 flex flex-col gap-4`}>
         <button
           onClick={createNewChat}
-          className="w-full flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"
+          className="w-full flex items-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"
         >
           <PlusCircle className="w-5 h-5" />
           New Chat
@@ -660,8 +680,11 @@ export default function Chat() {
           {sessions.map(session => (
             <div key={session.id} className="flex items-center gap-2 group">
               <button
-                onClick={() => switchSession(session.id)}
-                className={`flex-1 flex flex-col items-start gap-1 px-4 py-2 rounded-lg transition-colors ${
+                onClick={() => {
+                  switchSession(session.id);
+                  setIsSidebarOpen(false); // Close sidebar on mobile after selection
+                }}
+                className={`flex-1 flex flex-col items-start gap-1 px-4 py-3 rounded-lg transition-colors ${
                   session.id === currentSessionId
                     ? 'bg-emerald-600 text-white'
                     : 'text-white text-opacity-80 hover:bg-white hover:bg-opacity-10'
@@ -693,23 +716,23 @@ export default function Chat() {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col bg-white bg-opacity-10 backdrop-blur-lg rounded-r-2xl">
-        <div className="flex justify-between items-center p-4 border-b border-white border-opacity-10">
+      <div className="flex-1 flex flex-col bg-white bg-opacity-10 backdrop-blur-lg lg:rounded-r-2xl">
+        <div className="flex justify-between items-center p-3 sm:p-4 border-b border-white border-opacity-10">
           <div className="flex items-center space-x-2">
-            <h2 className="text-white text-lg font-semibold">🇵🇰 Pakistan AI Assistant</h2>
-            <span className="text-xs text-emerald-300">Built by Abdul Wali bin Salman</span>
+            <h2 className="text-white text-lg font-semibold">🇵🇰 Pakistan AI</h2>
+            <span className="hidden sm:inline text-xs text-emerald-300">Built by Abdul Wali</span>
           </div>
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={clearHistory}
-              className="flex items-center px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-            >
-              <Trash2 className="w-4 h-4 mr-1" />
-              Clear Chat
-            </button>
-          </div>
+          <button
+            onClick={clearHistory}
+            className="flex items-center px-2 sm:px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+            <span className="hidden sm:inline ml-1">Clear</span>
+          </button>
         </div>
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+
+        {/* Messages area with improved mobile spacing */}
+        <div className="flex-1 overflow-y-auto p-2 sm:p-6 space-y-3 sm:space-y-4">
           {messages.length === 0 && (
             <div className="text-center text-white text-opacity-60">
               <p className="mb-2">السَّلامُ عَلَيْكُم (Assalam-u-Alaikum) 👋</p>
@@ -734,7 +757,7 @@ export default function Chat() {
                 className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} group`}
               >
                 <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-2 ${
+                  className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-3 sm:px-4 py-2 ${
                     message.role === 'user'
                       ? 'bg-emerald-600 text-white'
                       : message.error
@@ -786,33 +809,28 @@ export default function Chat() {
           <div ref={messagesEndRef} />
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 border-t border-white border-opacity-10">
-          <div className="flex items-center space-x-4">
-            <div className="flex space-x-2">
+        {/* Input area with better mobile spacing */}
+        <form onSubmit={handleSubmit} className="p-2 sm:p-4 border-t border-white border-opacity-10">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <div className="flex gap-1">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition flex items-center relative group"
-                title="Upload Document"
+                className="p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition"
+                title="Upload"
               >
                 <FileUp className="w-5 h-5" />
-                <span className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                  Upload Document
-                </span>
               </button>
               <button
                 type="button"
                 onClick={handleSearch}
                 disabled={isLoading}
-                className={`p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition flex items-center relative group ${
+                className={`p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition ${
                   isSearching ? 'bg-emerald-600' : ''
                 }`}
-                title={isSearching ? "Click to search" : "Activate web search"}
+                title={isSearching ? "Search" : "Web Search"}
               >
                 <Search className="w-5 h-5" />
-                <span className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                  {isSearching ? "Click to search" : "Activate web search"}
-                </span>
               </button>
             </div>
             <input
@@ -828,12 +846,12 @@ export default function Chat() {
               onChange={(e) => setInput(e.target.value)}
               placeholder={
                 pendingFile 
-                  ? `Add analysis instructions for ${pendingFile.name}...`
+                  ? `Instructions for ${pendingFile.name}...`
                   : isSearching 
-                  ? "Enter your search query..." 
-                  : "Type your message in English or Urdu..."
+                  ? "Search..." 
+                  : "Type message..."
               }
-              className="flex-1 bg-white bg-opacity-10 text-white placeholder-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="flex-1 bg-white bg-opacity-10 text-white placeholder-gray-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
               disabled={isLoading}
             />
             {error ? (
@@ -842,7 +860,7 @@ export default function Chat() {
                 onClick={handleRetry}
                 disabled={isLoading || retryCount >= 3}
                 className="p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition disabled:opacity-50"
-                title="Retry last message"
+                title="Retry"
               >
                 <RefreshCcw className="w-5 h-5" />
               </button>
@@ -850,31 +868,36 @@ export default function Chat() {
               <button
                 type="submit"
                 disabled={isLoading || !input.trim()}
-                className="p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition disabled:opacity-50 relative group"
+                className="p-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition disabled:opacity-50"
               >
                 <Send className="w-5 h-5" />
-                <span className="absolute bottom-full mb-2 right-0 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                  Send
-                </span>
               </button>
             )}
           </div>
-          {pendingFile && (
-            <div className="mt-2 text-xs text-emerald-300 flex items-center gap-1">
-              <span>📎 {pendingFile.name} ready for analysis. Add your instructions above.</span>
+          {/* Compact error and file indicators */}
+          {(pendingFile || error) && (
+            <div className="mt-2 text-xs flex items-center gap-1">
+              {pendingFile && (
+                <span className="text-emerald-300">📎 File ready</span>
+              )}
+              {error && (
+                <span className="text-red-300 flex items-center gap-1">
+                  <AlertCircle className="w-4 h-4" />
+                  {error}
+                </span>
+              )}
             </div>
           )}
-          {error && (
-            <div className="mt-2 text-xs text-red-300 flex items-center gap-1">
-              <AlertCircle className="w-4 h-4" />
-              {error}
-            </div>
-          )}
-          <div className="mt-2 text-xs text-emerald-300 text-center">
-            Contact: walisalman44@gmail.com
-          </div>
         </form>
+
+        {/* Mobile backdrop */}
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
       </div>
     </div>
   );
-} 
+}
