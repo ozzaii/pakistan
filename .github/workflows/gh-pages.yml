@@ -33,7 +33,7 @@ jobs:
       - name: Build
         working-directory: pakistan-ai-web
         env:
-          NEXT_PUBLIC_GEMINI_API_KEY: AIzaSyARZyERqMaFInsbRKUA0NxOok77syBNzK8
+          NEXT_PUBLIC_GEMINI_API_KEY: ${{ secrets.NEXT_PUBLIC_GEMINI_API_KEY }}
           NODE_ENV: production
         run: |
           npm run build
