@@ -717,11 +717,14 @@ export default function Chat() {
       {/* Main Chat Area - Premium AF */}
       <div className="flex-1 flex flex-col h-full w-full">
         {/* Header - Clean + minimal */}
-        <div className="flex justify-between items-center h-14 px-4 bg-black/20 backdrop-blur-xl shrink-0">
-          <h2 className="text-white text-base font-medium tracking-wide">🇵🇰 Pakistan AI</h2>
+        <div className="flex justify-between items-center h-14 px-4 bg-black/20 backdrop-blur-xl shrink-0 border-b border-white/5">
+          <h2 className="text-white text-base font-medium tracking-wide flex items-center gap-2">
+            <span className="text-lg">🇵🇰</span>
+            <span className="bg-gradient-to-r from-emerald-400 to-emerald-200 bg-clip-text text-transparent">Pakistan AI</span>
+          </h2>
           <button
             onClick={clearHistory}
-            className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+            className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-xl transition-all"
             title="Clear chat"
           >
             <Trash2 className="w-4 h-4" />
@@ -729,28 +732,28 @@ export default function Chat() {
         </div>
 
         {/* Messages + Input Container - Premium positioning */}
-        <div className="flex-1 flex flex-col max-h-[calc(100vh-3.5rem)] lg:max-h-[85vh] mx-auto w-full lg:w-[85%] xl:w-[75%] 2xl:w-[65%]">
+        <div className="flex-1 flex flex-col max-h-[calc(100vh-3.5rem)] lg:max-h-[85vh] mx-auto w-full lg:w-[85%] xl:w-[75%] 2xl:w-[65%] py-4 lg:py-8">
           {/* Messages area - Clean scroll */}
-          <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 scroll-smooth">
+          <div className="flex-1 overflow-y-auto px-4 space-y-4 scroll-smooth scrollbar-thin scrollbar-thumb-white/10">
             {messages.length === 0 && (
               <div className="text-center text-white/90 mt-6 sm:mt-8">
                 <p className="mb-3 text-lg sm:text-xl font-medium [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
-                  السَّلامُ عَلَيْكُم 👋
+                  <span className="bg-gradient-to-r from-emerald-400 to-emerald-200 bg-clip-text text-transparent">السَّلامُ عَلَيْكُم</span> 👋
                 </p>
                 <p className="text-base sm:text-lg mb-6">How may I assist you today?</p>
-                <div className="max-w-sm mx-auto text-sm bg-black/20 backdrop-blur-lg rounded-xl p-4 shadow-xl ring-1 ring-white/10">
+                <div className="max-w-sm mx-auto text-sm bg-black/20 backdrop-blur-lg rounded-2xl p-4 shadow-xl ring-1 ring-white/10 hover:ring-white/20 transition-all">
                   <p className="mb-2 text-emerald-400 font-medium">You can:</p>
                   <ul className="space-y-2 text-white/80">
                     <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
+                      <span className="w-1.5 h-1.5 bg-gradient-to-r from-emerald-400 to-emerald-300 rounded-full"></span>
                       Ask questions in English or Urdu
                     </li>
                     <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
+                      <span className="w-1.5 h-1.5 bg-gradient-to-r from-emerald-400 to-emerald-300 rounded-full"></span>
                       Upload documents for analysis
                     </li>
                     <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
+                      <span className="w-1.5 h-1.5 bg-gradient-to-r from-emerald-400 to-emerald-300 rounded-full"></span>
                       Search for latest information
                     </li>
                   </ul>
@@ -758,20 +761,21 @@ export default function Chat() {
               </div>
             )}
             
-            {/* Messages */}
-            <AnimatePresence>
+            {/* Messages with better animations */}
+            <AnimatePresence mode="popLayout">
               {messages.map((message, index) => (
                 <motion.div
                   key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
+                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                  transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} group`}
                 >
                   <div
                     className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-4 py-3 ${
                       message.role === 'user'
-                        ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 ring-1 ring-white/20'
+                        ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/20 ring-1 ring-white/20'
                         : message.error
                         ? 'bg-red-500/10 text-white ring-1 ring-red-500/30'
                         : 'bg-black/20 text-white backdrop-blur-sm ring-1 ring-white/10'
@@ -808,12 +812,12 @@ export default function Chat() {
               ))}
               {isLoading && (
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
                   className="flex justify-start"
                 >
                   <div className="bg-black/20 backdrop-blur-sm rounded-2xl px-4 py-3 ring-1 ring-white/10">
-                    <Loader2 className="w-5 h-5 animate-spin text-white" />
+                    <Loader2 className="w-5 h-5 animate-spin text-emerald-400" />
                   </div>
                 </motion.div>
               )}
@@ -822,7 +826,7 @@ export default function Chat() {
           </div>
 
           {/* Input area - Premium AF */}
-          <div className="w-full bg-black/20 backdrop-blur-sm px-4 py-4 lg:rounded-2xl lg:my-6 lg:mx-auto lg:max-w-3xl lg:ring-1 lg:ring-white/10 lg:shadow-xl">
+          <div className="w-full bg-black/20 backdrop-blur-sm px-4 py-4 lg:rounded-2xl lg:mt-6 lg:mx-auto lg:max-w-3xl lg:ring-1 lg:ring-white/10 lg:shadow-xl hover:lg:ring-white/20 transition-all">
             <form 
               onSubmit={handleSubmit} 
               className="flex flex-col gap-3"
@@ -891,7 +895,7 @@ export default function Chat() {
                 <div className="flex items-center gap-3 px-1">
                   {pendingFile && (
                     <span className="text-emerald-400 flex items-center gap-1.5 text-xs">
-                      <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+                      <span className="w-1.5 h-1.5 bg-gradient-to-r from-emerald-400 to-emerald-300 rounded-full animate-pulse"></span>
                       File ready for analysis
                     </span>
                   )}
