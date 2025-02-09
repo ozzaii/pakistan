@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Send, FileUp, Search, Loader2, AlertCircle, RefreshCcw, Trash2, Download, PlusCircle, MessageCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -621,61 +621,333 @@ export default function Chat() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex flex-col flex-1 w-full h-full overflow-hidden">
-      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-        {/* Messages with better animations */}
-        <div className="flex flex-col space-y-4 p-4">
-          {messages.map((message, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.95 }}
-              transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
-              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} group`}
+    <div className="flex flex-col lg:flex-row h-full w-full relative">
+      {/* Mobile Menu Button - Fixed bottom right */}
+      <button
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className="lg:hidden fixed bottom-8 right-4 z-[60] p-4 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 backdrop-blur-xl rounded-full text-white shadow-lg shadow-emerald-500/20 ring-1 ring-white/20 transition-all"
+      >
+        <MessageCircle className="w-6 h-6" />
+      </button>
+
+      {/* Mobile Bottom Sheet */}
+      <div 
+        className={`
+          lg:hidden fixed inset-x-0 bottom-0 z-50 transition-all duration-300 ease-in-out
+          ${isSidebarOpen ? 'translate-y-0' : 'translate-y-full'}
+          bg-black/95 backdrop-blur-2xl border-t border-white/10 
+          rounded-t-[28px] pb-safe-or-6
+          max-h-[80vh] overflow-hidden flex flex-col
+          shadow-[0_-8px_32px_rgba(0,0,0,0.5)]
+        `}
+      >
+        {/* Pull indicator */}
+        <div className="p-3 flex justify-center touch-none">
+          <div className="w-12 h-1.5 bg-white/20 rounded-full"></div>
+        </div>
+        
+        {/* Mobile sidebar content */}
+        <div className="p-4 flex flex-col gap-3 overflow-y-auto">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-lg font-semibold text-white">Your Chats</h2>
+            <button
+              onClick={createNewChat}
+              className="flex items-center justify-center p-2 bg-emerald-500/20 hover:bg-emerald-500/30 active:bg-emerald-500/40 text-emerald-400 rounded-xl transition-all ring-1 ring-emerald-500/30 touch-none"
             >
-              <div
-                className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-4 py-3 ${
-                  message.role === 'user'
-                    ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/20 ring-1 ring-white/20'
-                    : message.error
-                    ? 'bg-red-500/10 text-white ring-1 ring-red-500/30'
-                    : 'bg-black/20 text-white backdrop-blur-sm ring-1 ring-white/10'
-                } relative group-hover:shadow-xl transition-all duration-200`}
-              >
-                {message.content}
-                {message.generatedFile && (
-                  <div className="mt-3 flex items-center gap-2">
-                    <button
-                      onClick={() => handleDownload(
-                        message.generatedFile!.content,
-                        message.generatedFile!.name,
-                        message.generatedFile!.type
-                      )}
-                      className="flex items-center gap-1.5 text-xs bg-emerald-500/20 hover:bg-emerald-500/30 active:bg-emerald-500/40 text-emerald-400 px-3 py-1.5 rounded-lg transition-all ring-1 ring-emerald-500/30"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      Download {message.generatedFile.name}
-                    </button>
+              <PlusCircle className="w-5 h-5" />
+            </button>
+          </div>
+          
+          {/* Chat list */}
+          <div className="flex-1 space-y-2.5">
+            {sessions.map(session => (
+              <div key={session.id} className="flex items-center gap-2 group touch-none">
+                <button
+                  onClick={() => {
+                    switchSession(session.id);
+                    setIsSidebarOpen(false);
+                  }}
+                  className={`flex-1 flex flex-col items-start gap-1.5 px-4 py-3 rounded-xl transition-all ${
+                    session.id === currentSessionId
+                      ? 'bg-emerald-500/20 text-white ring-1 ring-emerald-500/30'
+                      : 'text-white/70 hover:bg-white/5 active:bg-white/10'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 w-full">
+                    <MessageCircle className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate text-left text-sm font-medium">{session.title}</span>
                   </div>
-                )}
-                {message.timestamp && (
-                  <div className="text-xs opacity-0 group-hover:opacity-60 mt-1.5 transition-opacity">
-                    {new Date(message.timestamp).toLocaleString('en-US', {
+                  <span className="text-xs opacity-60 truncate w-full">
+                    {new Date(session.lastUpdated).toLocaleString('en-US', {
                       month: 'short',
                       day: 'numeric',
                       hour: '2-digit',
                       minute: '2-digit'
                     })}
-                  </div>
-                )}
+                  </span>
+                </button>
+                <button
+                  onClick={() => deleteSession(session.id)}
+                  className="p-3 text-white/70 hover:text-white hover:bg-red-500/20 active:bg-red-500/30 rounded-xl transition-all"
+                  title="Delete chat"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
-            </motion.div>
-          ))}
-          <div ref={messagesEndRef} className="h-4" /> {/* Add some padding at the bottom */}
+            ))}
+          </div>
         </div>
       </div>
-      {/* Your input component here */}
+
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:flex w-[300px] h-full flex-col bg-black/40 backdrop-blur-xl border-r border-white/10">
+        <div className="p-3 flex items-center justify-between border-b border-white/10">
+          <h2 className="text-base font-medium text-white">Chats</h2>
+          <button
+            onClick={createNewChat}
+            className="p-1.5 text-white/80 hover:text-white hover:bg-white/10 active:bg-white/20 rounded-lg transition-all"
+            title="New Chat"
+          >
+            <PlusCircle className="w-5 h-5" />
+          </button>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto py-2 space-y-1 scrollbar-thin scrollbar-thumb-white/10">
+          {sessions.map(session => (
+            <div key={session.id} className="px-2">
+              <button
+                onClick={() => switchSession(session.id)}
+                className={`w-full flex items-center gap-3 px-2 py-2 rounded-lg transition-all group ${
+                  session.id === currentSessionId
+                    ? 'bg-emerald-500/20 text-white'
+                    : 'text-white/70 hover:bg-white/5'
+                }`}
+              >
+                <MessageCircle className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate text-left text-sm">{session.title}</span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteSession(session.id);
+                  }}
+                  className="ml-auto p-1 opacity-0 group-hover:opacity-100 text-white/40 hover:text-white hover:bg-white/10 rounded transition-all"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col h-dvh lg:h-full w-full">
+        {/* Header */}
+        <div className="flex justify-between items-center h-14 px-4 bg-black/20 backdrop-blur-xl shrink-0 border-b border-white/5">
+          <h2 className="text-white text-base font-medium tracking-wide flex items-center gap-2">
+            <span className="text-lg">🇵🇰</span>
+            <span className="bg-gradient-to-r from-emerald-400 to-emerald-200 bg-clip-text text-transparent">Pakistan AI</span>
+          </h2>
+          <button
+            onClick={clearHistory}
+            className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-xl transition-all"
+            title="Clear chat"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Messages Container with Scroll */}
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+          <div className="flex flex-col space-y-4 p-4">
+            {messages.length === 0 && (
+              <div className="text-center text-white/90 mt-6 sm:mt-8">
+                <p className="mb-3 text-lg sm:text-xl font-medium [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
+                  <span className="bg-gradient-to-r from-emerald-400 to-emerald-200 bg-clip-text text-transparent">السَّلامُ عَلَيْكُم</span> 👋
+                </p>
+                <p className="text-base sm:text-lg mb-6">How may I assist you today?</p>
+                <div className="max-w-sm mx-auto text-sm bg-black/20 backdrop-blur-lg rounded-2xl p-4 shadow-xl ring-1 ring-white/10 hover:ring-white/20 transition-all">
+                  <p className="mb-2 text-emerald-400 font-medium">You can:</p>
+                  <ul className="space-y-2 text-white/80">
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 bg-gradient-to-r from-emerald-400 to-emerald-300 rounded-full"></span>
+                      Ask questions in English or Urdu
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 bg-gradient-to-r from-emerald-400 to-emerald-300 rounded-full"></span>
+                      Upload documents for analysis
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 bg-gradient-to-r from-emerald-400 to-emerald-300 rounded-full"></span>
+                      Search for latest information
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            )}
+            
+            {/* Messages */}
+            {messages.map((message, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} group`}
+              >
+                <div
+                  className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-4 py-3 ${
+                    message.role === 'user'
+                      ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/20 ring-1 ring-white/20'
+                      : message.error
+                      ? 'bg-red-500/10 text-white ring-1 ring-red-500/30'
+                      : 'bg-black/20 text-white backdrop-blur-sm ring-1 ring-white/10'
+                  } relative group-hover:shadow-xl transition-all duration-200`}
+                >
+                  {message.content}
+                  {message.generatedFile && (
+                    <div className="mt-3 flex items-center gap-2">
+                      <button
+                        onClick={() => handleDownload(
+                          message.generatedFile!.content,
+                          message.generatedFile!.name,
+                          message.generatedFile!.type
+                        )}
+                        className="flex items-center gap-1.5 text-xs bg-emerald-500/20 hover:bg-emerald-500/30 active:bg-emerald-500/40 text-emerald-400 px-3 py-1.5 rounded-lg transition-all ring-1 ring-emerald-500/30"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        Download {message.generatedFile.name}
+                      </button>
+                    </div>
+                  )}
+                  {message.timestamp && (
+                    <div className="text-xs opacity-0 group-hover:opacity-60 mt-1.5 transition-opacity">
+                      {new Date(message.timestamp).toLocaleString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+            {isLoading && (
+              <motion.div
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                className="flex justify-start"
+              >
+                <div className="bg-black/20 backdrop-blur-sm rounded-2xl px-4 py-3 ring-1 ring-white/10">
+                  <Loader2 className="w-5 h-5 animate-spin text-emerald-400" />
+                </div>
+              </motion.div>
+            )}
+            <div ref={messagesEndRef} className="h-4" />
+          </div>
+        </div>
+
+        {/* Input Container */}
+        <div className="w-full bg-gradient-to-t from-black/80 to-black/40 backdrop-blur-xl border-t border-white/10">
+          <div className="px-4 py-4 lg:py-6">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="p-2.5 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all"
+                    title="Upload file"
+                  >
+                    <FileUp className="w-5 h-5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSearch}
+                    disabled={isLoading}
+                    className={`p-2.5 text-white/70 hover:text-white rounded-xl transition-all ${
+                      isSearching 
+                        ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30' 
+                        : 'hover:bg-white/10'
+                    }`}
+                    title={isSearching ? "Search" : "Web Search"}
+                  >
+                    <Search className="w-5 h-5" />
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={
+                    pendingFile 
+                      ? `Instructions for ${pendingFile.name}...`
+                      : isSearching 
+                      ? "Search..." 
+                      : "Type message..."
+                  }
+                  className="flex-1 bg-black/20 text-white placeholder-white/50 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-sm transition-all"
+                  disabled={isLoading}
+                />
+                {error ? (
+                  <button
+                    type="button"
+                    onClick={handleRetry}
+                    disabled={isLoading || retryCount >= 3}
+                    className="p-2.5 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all disabled:opacity-50"
+                    title="Retry"
+                  >
+                    <RefreshCcw className="w-5 h-5" />
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={isLoading || !input.trim()}
+                    className="p-2.5 text-white/70 hover:text-white hover:bg-emerald-500/20 rounded-xl transition-all disabled:opacity-50"
+                  >
+                    <Send className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Status indicators */}
+              {(pendingFile || error) && (
+                <div className="flex items-center gap-3 px-1 pt-1">
+                  {pendingFile && (
+                    <span className="text-emerald-400 flex items-center gap-1.5 text-xs">
+                      <span className="w-1.5 h-1.5 bg-gradient-to-r from-emerald-400 to-emerald-300 rounded-full animate-pulse"></span>
+                      File ready for analysis
+                    </span>
+                  )}
+                  {error && (
+                    <span className="text-red-400 flex items-center gap-1.5 text-xs">
+                      <AlertCircle className="w-3.5 h-3.5" />
+                      {error}
+                    </span>
+                  )}
+                </div>
+              )}
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileUpload}
+                accept=".pdf,.doc,.docx,.txt,.csv,image/*,application/json"
+                className="hidden"
+              />
+            </form>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile backdrop */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-md z-40 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
     </div>
   );
 }
