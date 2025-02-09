@@ -23,15 +23,17 @@ interface Message {
   };
 }
 
+interface GeminiPart {
+  text?: string;
+  inlineData?: {
+    mimeType: string;
+    data: string;
+  };
+}
+
 interface GeminiPayload {
   contents: Array<{
-    parts: Array<{
-      text?: string;
-      inlineData?: {
-        mimeType: string;
-        data: string;
-      };
-    }>;
+    parts: GeminiPart[];
   }>;
   generationConfig: {
     temperature: number;
@@ -342,8 +344,12 @@ export default function Chat() {
 
   const callGeminiAPI = async (content: string, fileData?: string, fileType?: string) => {
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-001:generateContent?key=${apiKey}`;
+    if (!apiKey) {
+      throw new Error('Missing API key - please check your environment variables');
+    }
 
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    
     const currentSession = sessions.find(s => s.id === currentSessionId);
     const chatContext = currentSession?.context || '';
 
@@ -365,10 +371,10 @@ export default function Chat() {
         ]
       }],
       generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.8,
-        maxOutputTokens: 2048,
+        temperature: 0.9,
+        topK: 32,
+        topP: 0.9,
+        maxOutputTokens: 4096,
         candidateCount: 1,
         stopSequences: ["User:", "Human:"]
       },

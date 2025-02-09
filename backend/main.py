@@ -128,7 +128,7 @@ app.add_middleware(
 
 async def call_gemini_api(messages: List[Message], temperature: float, max_tokens: int) -> str:
     api_key = os.getenv("GEMINI_API_KEY")
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
     
     # Add system prompt for Pakistani context
     system_prompt = {
@@ -179,8 +179,10 @@ Always maintain a respectful, understanding, and culturally sensitive approach."
         "generationConfig": {
             "temperature": temperature,
             "maxOutputTokens": max_tokens,
-            "topP": 0.8,
-            "topK": 40
+            "topP": 0.9,
+            "topK": 32,
+            "candidateCount": 1,
+            "stopSequences": ["User:", "Human:"]
         },
         "safetySettings": [
             {

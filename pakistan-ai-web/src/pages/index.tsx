@@ -44,10 +44,10 @@ export default function Home() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className="flex-1 w-full min-h-0 pt-safe px-0 pb-safe"
-      >
+        >
         <div className="h-full">
           <Chat />
-        </div>
+      </div>
       </motion.div>
     </main>
   );
