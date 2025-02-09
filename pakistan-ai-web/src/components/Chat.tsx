@@ -727,7 +727,7 @@ const Chat = ({
       {/* Mobile Menu Button - Fixed bottom right */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="lg:hidden fixed bottom-8 right-4 z-[60] p-4 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 backdrop-blur-xl rounded-full text-white shadow-lg shadow-emerald-500/20 ring-1 ring-white/20 transition-all"
+        className="lg:hidden fixed bottom-24 right-4 z-[60] p-4 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 backdrop-blur-xl rounded-full text-white shadow-lg shadow-emerald-500/20 ring-1 ring-white/20 transition-all"
       >
         <MessageCircle className="w-6 h-6" />
       </button>
@@ -944,7 +944,7 @@ const Chat = ({
 
         {/* Input Container */}
         <div className="w-full bg-gradient-to-t from-black/80 to-black/40 backdrop-blur-xl border-t border-white/10">
-          <div className="px-4 py-4 lg:py-6">
+          <div className="px-4 py-4 lg:py-6 pb-safe-or-6 mb-16 lg:mb-0">
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
               <div className="flex items-center gap-2">
                 <div className="flex gap-1.5">
