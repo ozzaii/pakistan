@@ -368,12 +368,21 @@ export default function Chat() {
 
     const systemPrompt = isAdvisor ? ADVISOR_PROMPT : ASSISTANT_PROMPT;
     const fullPrompt = `${systemPrompt}\n\n${chatContext ? `Previous Context:\n${chatContext}\n\n` : ''}User: ${content}\nAssistant:`;
+
+    const parts: GeminiPart[] = [{ text: fullPrompt }];
+    
+    if (fileData && fileType) {
+      parts.push({
+        inlineData: {
+          mimeType: fileType,
+          data: fileData.split(',')[1] // Remove the data URL prefix
+        }
+      });
+    }
     
     const payload: GeminiPayload = {
       contents: [{
-        parts: [
-          { text: fullPrompt }
-        ]
+        parts
       }],
       generationConfig: {
         temperature: 0.9,
@@ -403,32 +412,39 @@ export default function Chat() {
       ]
     };
 
-    if (fileData && fileType) {
-      payload.contents[0].parts.push({
-        inlineData: {
-          mimeType: fileType,
-          data: fileData.split(',')[1]
-        }
-      });
-    }
-
     try {
+      console.log('Sending request to Gemini API:', {
+        url,
+        headers,
+        payload
+      });
+
       const response = await fetch(url, {
         method: 'POST',
-        headers: headers,
+        headers,
         body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('API Error:', errorData);
+        console.error('Gemini API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData
+        });
         throw new Error(`API Error: ${errorData.error?.message || response.statusText}`);
       }
 
       const data = await response.json();
+      console.log('Gemini API Response:', data);
+
+      if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+        throw new Error('Invalid response format from Gemini API');
+      }
+
       return data.candidates[0].content.parts[0].text;
     } catch (error) {
-      console.error('API Call Error:', error);
+      console.error('Gemini API Call Error:', error);
       throw error;
     }
   };
