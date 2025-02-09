@@ -379,7 +379,13 @@ export default function Chat() {
   };
 
   const callGeminiAPI = async (content: string, fileData?: string, fileType?: string) => {
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent`;
+    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    if (!apiKey) {
+      console.error('Missing Gemini API key in environment variables');
+      throw new Error('API configuration error - please contact support');
+    }
+    
+    const url = `https://generativelanguage.googleapis.com/v1/models/models/gemini-2.0-flash-001:generateContent?key=${apiKey}`;
     
     const headers = {
       'Content-Type': 'application/json'
