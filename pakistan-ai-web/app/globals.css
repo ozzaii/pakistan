@@ -16,6 +16,14 @@
   }
 }
 
+html, body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
@@ -24,4 +32,21 @@ body {
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
+  position: relative;
+  min-height: 100vh;
+}
+
+#__next {
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Prevent horizontal scroll on mobile */
+@media (max-width: 768px) {
+  .overflow-guard {
+    overflow-x: hidden;
+    width: 100vw;
+    position: relative;
+  }
 } 
