@@ -133,9 +133,45 @@ export default function Chat() {
     [sessions, currentSessionId]
   );
 
-  // Batch updates for messages
+  // Add mounted ref
+  const mounted = useRef(true);
+
+  // Add cleanup
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
+  // Update state setters to check mounted status
+  const safeSetMessages = useCallback((newMessages: Message[]) => {
+    if (mounted.current) {
+      setMessages(newMessages);
+    }
+  }, []);
+
+  const safeSetInput = useCallback((value: string) => {
+    if (mounted.current) {
+      setInput(value);
+    }
+  }, []);
+
+  const safeSetError = useCallback((value: string | null) => {
+    if (mounted.current) {
+      setError(value);
+    }
+  }, []);
+
+  const safeSetLoading = useCallback((value: boolean) => {
+    if (mounted.current) {
+      setIsLoading(value);
+    }
+  }, []);
+
+  // Update the updateMessages function to use safeSetMessages
   const updateMessages = useCallback((newMessages: Message[]) => {
-    setMessages(newMessages);
+    safeSetMessages(newMessages);
     setSessions(prev => prev.map(session => {
       if (session.id === currentSessionId) {
         const context = generateChatContext(newMessages);
@@ -153,7 +189,7 @@ export default function Chat() {
       }
       return session;
     }));
-  }, [currentSessionId]);
+  }, [currentSessionId, safeSetMessages]);
 
   // Debounced localStorage update
   useEffect(() => {
@@ -343,16 +379,10 @@ export default function Chat() {
   };
 
   const callGeminiAPI = async (content: string, fileData?: string, fileType?: string) => {
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    if (!apiKey) {
-      throw new Error('Missing API key - please check your environment variables');
-    }
-    
     const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent`;
     
     const headers = {
-      'Content-Type': 'application/json',
-      'x-goog-api-key': apiKey
+      'Content-Type': 'application/json'
     };
 
     const currentSession = sessions.find(s => s.id === currentSessionId);
@@ -520,11 +550,11 @@ export default function Chat() {
 
     if (!retryContent) {
       updateMessages([...messages, userMessage]);
-      setInput('');
+      safeSetInput('');
     }
     
-    setIsLoading(true);
-    setError(null);
+    safeSetLoading(true);
+    safeSetError(null);
 
     try {
       let response: string;
@@ -539,37 +569,43 @@ export default function Chat() {
         );
       }
       
-      const generatedFile = await generateDocument(response);
-      const assistantMessage: Message = {
-        role: 'assistant',
-        content: response,
-        timestamp: new Date(),
-        ...(generatedFile && { generatedFile })
-      };
-      
-      updateMessages([...messages, userMessage, assistantMessage]);
-      
-      if (generatedFile) {
-        toast.success('Document generated! Click the download button to save it.');
+      if (mounted.current) {
+        const generatedFile = await generateDocument(response);
+        const assistantMessage: Message = {
+          role: 'assistant',
+          content: response,
+          timestamp: new Date(),
+          ...(generatedFile && { generatedFile })
+        };
+        
+        updateMessages([...messages, userMessage, assistantMessage]);
+        
+        if (generatedFile) {
+          toast.success('Document generated! Click the download button to save it.');
+        }
+        
+        setRetryCount(0);
       }
-      
-      setRetryCount(0);
     } catch (error) {
       console.error('Error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to get response';
       
-      toast.error(errorMessage);
-      setError(errorMessage);
+      if (mounted.current) {
+        toast.error(errorMessage);
+        safeSetError(errorMessage);
 
-      updateMessages([...messages, userMessage, {
-        role: 'assistant',
-        content: errorMessage,
-        timestamp: new Date(),
-        error: true
-      }]);
+        updateMessages([...messages, userMessage, {
+          role: 'assistant',
+          content: errorMessage,
+          timestamp: new Date(),
+          error: true
+        }]);
+      }
     } finally {
-      setIsLoading(false);
-      setPendingFile(null);
+      if (mounted.current) {
+        safeSetLoading(false);
+        setPendingFile(null);
+      }
     }
   };
 
@@ -581,7 +617,7 @@ export default function Chat() {
         return;
       }
 
-      setIsLoading(true);
+      safeSetLoading(true);
 
       try {
         const searchPrompt = `Web Search Results for: ${input}\n\nPlease provide comprehensive information about this topic, focusing on Pakistani context where relevant. Include:\n- Key facts and details\n- Local perspectives and examples\n- Recent developments\n- Cultural considerations\n- Practical implications`;
@@ -606,13 +642,13 @@ export default function Chat() {
         toast.error('Search failed. Please try again.');
       } finally {
         setIsSearching(false);
-        setIsLoading(false);
-        setInput('');
+        safeSetLoading(false);
+        safeSetInput('');
       }
     } else {
       // Activate search mode
       setIsSearching(true);
-      setInput('');
+      safeSetInput('');
       toast.success('Web search mode activated! Enter your search query.');
     }
   };
@@ -880,7 +916,7 @@ export default function Chat() {
                 <input
                   type="text"
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                  onChange={(e) => safeSetInput(e.target.value)}
                   placeholder={
                     pendingFile 
                       ? `Instructions for ${pendingFile.name}...`
