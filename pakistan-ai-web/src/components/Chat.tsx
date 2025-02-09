@@ -101,30 +101,47 @@ const generateChatContext = (messages: Message[]): string => {
   ).join('\n\n');
 };
 
-export default function Chat() {
-  const [sessions, setSessions] = useState<ChatSession[]>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('chatSessions');
-      return saved ? JSON.parse(saved) : [{
-        id: crypto.randomUUID(),
-        title: 'New Chat',
-        messages: [],
-        createdAt: new Date(),
-        lastUpdated: new Date()
-      }];
-    }
-    return [];
-  });
+const ChatWrapper = () => {
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [currentSessionId, setCurrentSessionId] = useState<string>('');
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  const [currentSessionId, setCurrentSessionId] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('chatSessions');
-      const sessions = saved ? JSON.parse(saved) : [];
-      return sessions.length > 0 ? sessions[0].id : crypto.randomUUID();
-    }
-    return '';
-  });
+  // Initialize sessions from localStorage on client-side only
+  useEffect(() => {
+    const savedSessions = localStorage.getItem('chatSessions');
+    const parsedSessions = savedSessions ? JSON.parse(savedSessions) : [{
+      id: crypto.randomUUID(),
+      title: 'New Chat',
+      messages: [],
+      createdAt: new Date(),
+      lastUpdated: new Date()
+    }];
+    
+    setSessions(parsedSessions);
+    setCurrentSessionId(parsedSessions[0]?.id || '');
+    setIsInitialized(true);
+  }, []);
 
+  if (!isInitialized) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-black">
+        <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
+      </div>
+    );
+  }
+
+  return <Chat initialSessions={sessions} initialSessionId={currentSessionId} />;
+};
+
+const Chat = ({ 
+  initialSessions,
+  initialSessionId 
+}: { 
+  initialSessions: ChatSession[];
+  initialSessionId: string;
+}) => {
+  const [sessions, setSessions] = useState(initialSessions);
+  const [currentSessionId, setCurrentSessionId] = useState(initialSessionId);
   const [messages, setMessages] = useState<Message[]>([]);
 
   // Memoize current session to prevent unnecessary re-renders
@@ -1020,4 +1037,6 @@ export default function Chat() {
       )}
     </div>
   );
-}
+};
+
+export default ChatWrapper;
