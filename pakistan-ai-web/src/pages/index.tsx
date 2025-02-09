@@ -38,16 +38,16 @@ export default function Home() {
         }} 
       />
 
-      {/* Chat Interface - Premium container */}
+      {/* Chat Interface Container */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="flex-1 w-full min-h-0 pt-safe px-0 pb-safe"
-        >
-        <div className="h-full">
+        className="flex-1 w-full max-w-full overflow-hidden"
+      >
+        <div className="h-full max-w-full relative">
           <Chat />
-      </div>
+        </div>
       </motion.div>
     </main>
   );
