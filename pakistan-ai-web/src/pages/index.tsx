@@ -7,12 +7,12 @@ import Chat from '@/components/Chat';
 export default function Home() {
   return (
     <main className="h-[100dvh] supports-[height:100svh]:h-[100svh] supports-[height:100dvh]:h-[100dvh] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-800 via-emerald-900 to-gray-900 relative overflow-hidden selection:bg-emerald-500/30 flex flex-col">
-      {/* Premium background pattern */}
+      {/* Subtle noise texture */}
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.015 }}
         transition={{ duration: 1.2, delay: 0.2 }}
-        className="fixed inset-0 bg-[url('/pattern.svg')] bg-repeat pointer-events-none mix-blend-plus-lighter" 
+        className="fixed inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.1)_0%,_transparent_100%)] bg-[length:4px_4px] pointer-events-none mix-blend-plus-lighter" 
       />
       
       {/* Refined gradient overlay */}
