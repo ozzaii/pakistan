@@ -128,12 +128,24 @@ app.add_middleware(
 
 async def call_gemini_api(messages: List[Message], temperature: float, max_tokens: int) -> str:
     api_key = os.getenv("GEMINI_API_KEY")
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
+    if not api_key:
+        raise HTTPException(
+            status_code=401,
+            detail="Gemini API key not configured"
+        )
     
-    # Add system prompt for Pakistani context
-    system_prompt = {
-        "parts": [{
-            "text": """You are a knowledgeable AI assistant with deep understanding of Pakistani culture, relationships, and values. Your role is to:
+    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent"
+    
+    headers = {
+        "Content-Type": "application/json",
+        "x-goog-api-key": api_key,
+    }
+    
+    # Convert messages to Gemini format
+    formatted_messages = []
+    
+    # Add system prompt as first message
+    system_prompt = """You are a knowledgeable AI assistant with deep understanding of Pakistani culture, relationships, and values. Your role is to:
 
 1. Provide guidance based on Pakistani cultural values and traditions
 2. Understand and respect family dynamics in Pakistani society
@@ -166,13 +178,15 @@ Your responses should reflect understanding of:
 - Modern challenges in Pakistani society
 
 Always maintain a respectful, understanding, and culturally sensitive approach."""
-        }]
-    }
+    formatted_messages.append({
+        "parts": [{"text": system_prompt}]
+    })
     
-    # Format messages for Gemini, including system prompt
-    formatted_messages = [system_prompt] + [{
-        "parts": [{"text": msg.content}]
-    } for msg in messages]
+    # Add user messages
+    for msg in messages:
+        formatted_messages.append({
+            "parts": [{"text": msg.content}]
+        })
     
     payload = {
         "contents": formatted_messages,
@@ -181,8 +195,7 @@ Always maintain a respectful, understanding, and culturally sensitive approach."
             "maxOutputTokens": max_tokens,
             "topP": 0.9,
             "topK": 32,
-            "candidateCount": 1,
-            "stopSequences": ["User:", "Human:"]
+            "candidateCount": 1
         },
         "safetySettings": [
             {
@@ -204,22 +217,40 @@ Always maintain a respectful, understanding, and culturally sensitive approach."
         ]
     }
     
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            url,
-            json=payload,
-            timeout=30.0
-        )
-        
-        if response.status_code != 200:
-            logger.error(f"Gemini API error: {response.text}")
-            raise HTTPException(
-                status_code=response.status_code,
-                detail="Error generating response"
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                url,
+                json=payload,
+                headers=headers,
+                timeout=30.0
             )
             
-        data = response.json()
-        return data["candidates"][0]["content"]["parts"][0]["text"]
+            if response.status_code != 200:
+                logger.error(f"Gemini API error: {response.text}")
+                raise HTTPException(
+                    status_code=response.status_code,
+                    detail=f"Error generating response: {response.text}"
+                )
+                
+            data = response.json()
+            if "candidates" not in data or not data["candidates"]:
+                raise HTTPException(
+                    status_code=500,
+                    detail="No response generated from Gemini API"
+                )
+            return data["candidates"][0]["content"]["parts"][0]["text"]
+    except httpx.TimeoutException:
+        raise HTTPException(
+            status_code=504,
+            detail="Request to Gemini API timed out"
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error calling Gemini API: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error while calling Gemini API"
+        )
 
 @app.post("/api/chat", response_model=ChatResponse, dependencies=[Depends(validate_request)])
 async def chat(
