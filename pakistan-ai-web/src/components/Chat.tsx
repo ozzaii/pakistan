@@ -274,6 +274,48 @@ export default function Chat() {
     textContent?: string;
   } | null>(null);
 
+  // Add formatted dates state
+  const [formattedDates, setFormattedDates] = useState<{[key: string]: string}>({});
+
+  // Format dates on client side only
+  useEffect(() => {
+    const formatDates = () => {
+      const newFormattedDates: {[key: string]: string} = {};
+      sessions.forEach(session => {
+        newFormattedDates[session.id] = new Date(session.lastUpdated).toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      });
+      setFormattedDates(newFormattedDates);
+    };
+    formatDates();
+  }, [sessions]);
+
+  // Add message timestamps state
+  const [messageTimestamps, setMessageTimestamps] = useState<{[key: number]: string}>({});
+
+  // Format message timestamps on client side only
+  useEffect(() => {
+    const formatMessageDates = () => {
+      const newTimestamps: {[key: number]: string} = {};
+      messages.forEach((message, index) => {
+        if (message.timestamp) {
+          newTimestamps[index] = new Date(message.timestamp).toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+        }
+      });
+      setMessageTimestamps(newTimestamps);
+    };
+    formatMessageDates();
+  }, [messages]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -715,12 +757,7 @@ export default function Chat() {
                     <span className="truncate text-left text-sm font-medium">{session.title}</span>
                   </div>
                   <span className="text-xs opacity-60 truncate w-full">
-                    {new Date(session.lastUpdated).toLocaleString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
+                    {formattedDates[session.id] || ''}
                   </span>
                 </div>
                 <button
@@ -762,12 +799,13 @@ export default function Chat() {
               >
                 <MessageCircle className="w-4 h-4 flex-shrink-0" />
                 <span className="truncate text-left text-sm">{session.title}</span>
+                <span className="text-xs opacity-60 ml-auto">{formattedDates[session.id] || ''}</span>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     deleteSession(session.id);
                   }}
-                  className="ml-auto p-1 opacity-0 group-hover:opacity-100 text-white/40 hover:text-white hover:bg-white/10 rounded transition-all"
+                  className="ml-2 p-1 opacity-0 group-hover:opacity-100 text-white/40 hover:text-white hover:bg-white/10 rounded transition-all"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -860,12 +898,7 @@ export default function Chat() {
                   )}
                   {message.timestamp && (
                     <div className="text-xs opacity-0 group-hover:opacity-60 mt-1.5 transition-opacity">
-                      {new Date(message.timestamp).toLocaleString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
+                      {messageTimestamps[index] || ''}
                     </div>
                   )}
                 </div>
