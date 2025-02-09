@@ -438,8 +438,14 @@ const Chat = ({
   };
 
   const callGeminiAPI = async (content: string, fileData?: string, fileType?: string) => {
-    // Use Gemini without API key
-    const url = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent';
+    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    console.log('Using API Key:', apiKey?.substring(0, 8) + '...');
+    
+    if (!apiKey) {
+      throw new Error('Missing API key - please check your .env.local file');
+    }
+    
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`;
     
     const headers = {
       'Content-Type': 'application/json'
