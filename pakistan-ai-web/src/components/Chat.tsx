@@ -380,12 +380,13 @@ export default function Chat() {
 
   const callGeminiAPI = async (content: string, fileData?: string, fileType?: string) => {
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    console.log('API Key:', apiKey); // Debug log
+    
     if (!apiKey) {
-      console.error('Missing Gemini API key in environment variables');
-      throw new Error('API configuration error - please contact support');
+      throw new Error('Missing API key - please check your .env.local file');
     }
     
-    const url = `https://generativelanguage.googleapis.com/v1/models/models/gemini-2.0-flash-001:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`;
     
     const headers = {
       'Content-Type': 'application/json'
