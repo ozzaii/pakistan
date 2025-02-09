@@ -379,14 +379,8 @@ export default function Chat() {
   };
 
   const callGeminiAPI = async (content: string, fileData?: string, fileType?: string) => {
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    console.log('API Key:', apiKey); // Debug log
-    
-    if (!apiKey) {
-      throw new Error('Missing API key - please check your .env.local file');
-    }
-    
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`;
+    // Use Gemini without API key
+    const url = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent';
     
     const headers = {
       'Content-Type': 'application/json'
@@ -705,12 +699,12 @@ export default function Chat() {
           <div className="flex-1 space-y-2.5">
             {sessions.map(session => (
               <div key={session.id} className="flex items-center gap-2 group touch-none">
-                <button
+                <div
                   onClick={() => {
                     switchSession(session.id);
                     setIsSidebarOpen(false);
                   }}
-                  className={`flex-1 flex flex-col items-start gap-1.5 px-4 py-3 rounded-xl transition-all ${
+                  className={`flex-1 flex flex-col items-start gap-1.5 px-4 py-3 rounded-xl transition-all cursor-pointer ${
                     session.id === currentSessionId
                       ? 'bg-emerald-500/20 text-white ring-1 ring-emerald-500/30'
                       : 'text-white/70 hover:bg-white/5 active:bg-white/10'
@@ -728,7 +722,7 @@ export default function Chat() {
                       minute: '2-digit'
                     })}
                   </span>
-                </button>
+                </div>
                 <button
                   onClick={() => deleteSession(session.id)}
                   className="p-3 text-white/70 hover:text-white hover:bg-red-500/20 active:bg-red-500/30 rounded-xl transition-all"
@@ -758,9 +752,9 @@ export default function Chat() {
         <div className="flex-1 overflow-y-auto py-2 space-y-1 scrollbar-thin scrollbar-thumb-white/10">
           {sessions.map(session => (
             <div key={session.id} className="px-2">
-              <button
+              <div
                 onClick={() => switchSession(session.id)}
-                className={`w-full flex items-center gap-3 px-2 py-2 rounded-lg transition-all group ${
+                className={`w-full flex items-center gap-3 px-2 py-2 rounded-lg transition-all group cursor-pointer ${
                   session.id === currentSessionId
                     ? 'bg-emerald-500/20 text-white'
                     : 'text-white/70 hover:bg-white/5'
@@ -777,7 +771,7 @@ export default function Chat() {
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
-              </button>
+              </div>
             </div>
           ))}
         </div>
