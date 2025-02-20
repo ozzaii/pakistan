@@ -781,60 +781,59 @@ const Chat = ({
           lg:hidden fixed inset-x-0 bottom-0 z-50 transition-all duration-300 ease-in-out
           ${isSidebarOpen ? 'translate-y-0' : 'translate-y-full'}
           bg-black/95 backdrop-blur-2xl border-t border-white/10 
-          rounded-t-[28px] pb-safe-or-6
-          max-h-[80vh] overflow-hidden flex flex-col
+          rounded-t-[28px] pb-safe-or-4
+          max-h-[85vh] overflow-hidden flex flex-col
           shadow-[0_-8px_32px_rgba(0,0,0,0.5)]
         `}
       >
         {/* Pull indicator */}
-        <div className="p-3 flex justify-center touch-none">
-          <div className="w-12 h-1.5 bg-white/20 rounded-full"></div>
+        <div className="p-2 flex justify-center touch-none">
+          <div className="w-10 h-1 bg-white/20 rounded-full"></div>
         </div>
         
         {/* Mobile sidebar content */}
-        <div className="p-4 flex flex-col gap-3 overflow-y-auto">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-lg font-semibold text-white">Your Chats</h2>
-            <button
-              onClick={createNewChat}
-              className="flex items-center justify-center p-2 bg-emerald-500/20 hover:bg-emerald-500/30 active:bg-emerald-500/40 text-emerald-400 rounded-xl transition-all ring-1 ring-emerald-500/30 touch-none"
-            >
-              <PlusCircle className="w-5 h-5" />
-            </button>
-          </div>
-          
-          {/* Chat list */}
-          <div className="flex-1 space-y-2.5">
-            {sessions.map(session => (
-              <div key={session.id} className="flex items-center gap-2 group touch-none">
-                <div
-                  onClick={() => {
-                    switchSession(session.id);
-                    setIsSidebarOpen(false);
-                  }}
-                  className={`flex-1 flex flex-col items-start gap-1.5 px-4 py-3 rounded-xl transition-all cursor-pointer ${
-                    session.id === currentSessionId
-                      ? 'bg-emerald-500/20 text-white ring-1 ring-emerald-500/30'
-                      : 'text-white/70 hover:bg-white/5 active:bg-white/10'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 w-full">
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-4 flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-medium text-white">Your Chats</h2>
+              <button
+                onClick={createNewChat}
+                className="flex items-center justify-center p-2 bg-emerald-500/20 hover:bg-emerald-500/30 active:bg-emerald-500/40 text-emerald-400 rounded-lg transition-all ring-1 ring-emerald-500/30 touch-none"
+              >
+                <PlusCircle className="w-4 h-4" />
+              </button>
+            </div>
+            
+            {/* Chat list */}
+            <div className="space-y-1.5 mt-2 pb-safe-or-4">
+              {sessions.map(session => (
+                <div key={session.id} className="flex items-center gap-2 group touch-none">
+                  <div
+                    onClick={() => {
+                      switchSession(session.id);
+                      setIsSidebarOpen(false);
+                    }}
+                    className={`flex-1 flex items-center gap-2 px-3 py-2.5 rounded-lg transition-all cursor-pointer ${
+                      session.id === currentSessionId
+                        ? 'bg-emerald-500/20 text-white ring-1 ring-emerald-500/30'
+                        : 'text-white/70 hover:bg-white/5 active:bg-white/10'
+                    }`}
+                  >
                     <MessageCircle className="w-4 h-4 flex-shrink-0" />
-                    <span className="truncate text-left text-sm font-medium">{session.title}</span>
+                    <span className="truncate text-left text-sm">{session.title}</span>
+                    <span className="text-[10px] opacity-60 ml-auto flex-shrink-0">
+                      {formattedDates[session.id] || ''}
+                    </span>
                   </div>
-                  <span className="text-xs opacity-60 truncate w-full">
-                    {formattedDates[session.id] || ''}
-                  </span>
+                  <button
+                    onClick={() => deleteSession(session.id)}
+                    className="p-2 text-white/50 hover:text-white hover:bg-red-500/20 active:bg-red-500/30 rounded-lg transition-all"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-                <button
-                  onClick={() => deleteSession(session.id)}
-                  className="p-3 text-white/70 hover:text-white hover:bg-red-500/20 active:bg-red-500/30 rounded-xl transition-all"
-                  title="Delete chat"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -900,7 +899,7 @@ const Chat = ({
 
         {/* Messages Container with Scroll */}
         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-          <div className="flex flex-col space-y-4 p-4">
+          <div className="flex flex-col space-y-4 p-4 pb-safe-or-6">
             {messages.length === 0 && (
               <div className="text-center text-white/90 mt-6 sm:mt-8">
                 <p className="mb-3 text-lg sm:text-xl font-medium [text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
@@ -1020,14 +1019,14 @@ const Chat = ({
 
         {/* Input Container */}
         <div className="w-full bg-gradient-to-t from-black/80 to-black/40 backdrop-blur-xl border-t border-white/10">
-          <div className="px-4 py-4 lg:py-6 pb-safe-or-6 mb-20 lg:mb-0">
-            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-              <div className="flex items-center gap-2">
-                <div className="flex gap-1.5">
+          <div className="px-4 py-3 lg:py-4 pb-safe-or-6 mb-20 lg:mb-0">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+              <div className="flex items-center gap-1.5">
+                <div className="flex gap-1">
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="p-2.5 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all"
+                    className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all"
                     title="Upload file"
                   >
                     <FileUp className="w-5 h-5" />
@@ -1036,7 +1035,7 @@ const Chat = ({
                     type="button"
                     onClick={handleSearch}
                     disabled={isLoading}
-                    className={`p-2.5 text-white/70 hover:text-white rounded-xl transition-all ${
+                    className={`p-2 text-white/70 hover:text-white rounded-lg transition-all ${
                       isSearching 
                         ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30' 
                         : 'hover:bg-white/10'
@@ -1057,7 +1056,7 @@ const Chat = ({
                       ? "Search..." 
                       : "Type message..."
                   }
-                  className="flex-1 bg-black/20 text-white placeholder-white/50 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-sm transition-all"
+                  className="flex-1 bg-black/20 text-white placeholder-white/50 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-sm transition-all min-h-[40px] max-h-[120px]"
                   disabled={isLoading}
                 />
                 {error ? (
@@ -1065,7 +1064,7 @@ const Chat = ({
                     type="button"
                     onClick={handleRetry}
                     disabled={isLoading || retryCount >= 3}
-                    className="p-2.5 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all disabled:opacity-50"
+                    className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all disabled:opacity-50"
                     title="Retry"
                   >
                     <RefreshCcw className="w-5 h-5" />
@@ -1074,7 +1073,7 @@ const Chat = ({
                   <button
                     type="submit"
                     disabled={isLoading || !input.trim()}
-                    className="p-2.5 text-white/70 hover:text-white hover:bg-emerald-500/20 rounded-xl transition-all disabled:opacity-50"
+                    className="p-2 text-white/70 hover:text-white hover:bg-emerald-500/20 rounded-lg transition-all disabled:opacity-50"
                   >
                     <Send className="w-5 h-5" />
                   </button>
@@ -1083,11 +1082,11 @@ const Chat = ({
 
               {/* Status indicators */}
               {(pendingFile || error) && (
-                <div className="flex items-center gap-3 px-1 pt-1">
+                <div className="flex items-center gap-2 px-1">
                   {pendingFile && (
                     <span className="text-emerald-400 flex items-center gap-1.5 text-xs">
                       <span className="w-1.5 h-1.5 bg-gradient-to-r from-emerald-400 to-emerald-300 rounded-full animate-pulse"></span>
-                      File ready for analysis
+                      File ready
                     </span>
                   )}
                   {error && (
