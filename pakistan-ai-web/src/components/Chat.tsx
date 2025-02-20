@@ -686,7 +686,7 @@ const Chat = ({
       safeSetLoading(true);
 
       try {
-        const searchPrompt = `Web Search Results for: ${input}\n\nPlease provide comprehensive information about this topic, focusing on Pakistani context where relevant. Include:\n- Key facts and details\n- Local perspectives and examples\n- Recent developments\n- Cultural considerations\n- Practical implications`;
+        const searchPrompt = `Web Search Results for: ${input}\n\nPlease provide comprehensive information about this topic, focusing on Pakistani context where relevant. Format the response elegantly with:\n\n• Key Facts & Details\n• Local Perspectives & Examples\n• Recent Developments\n• Cultural Considerations\n• Practical Implications\n\nUse "•" for bullet points, and format section headings in bold. Keep the tone professional yet accessible.`;
         
         const response = await callGeminiAPI(searchPrompt);
         
@@ -699,7 +699,7 @@ const Chat = ({
           },
           {
             role: 'assistant',
-            content: `**Search Results for "${input}"**\n\n${response}`,
+            content: `### Search Results: "${input}"\n\n${response}`,
             timestamp: new Date()
           }
         ]);
