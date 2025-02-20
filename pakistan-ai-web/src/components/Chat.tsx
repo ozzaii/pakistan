@@ -722,14 +722,57 @@ const Chat = ({
   // Add new state for mobile sidebar
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // Add chat suggestions
+  const chatSuggestions = [
+    {
+      text: "پاکستان کی معیشت کے بارے میں بتائیں",
+      icon: "📊",
+      category: "Economy"
+    },
+    {
+      text: "How can AI improve Pakistan's education?",
+      icon: "🎓",
+      category: "Education"
+    },
+    {
+      text: "Latest developments in Pakistan's tech sector",
+      icon: "💻",
+      category: "Technology"
+    },
+    {
+      text: "Analyze Pakistan's renewable energy potential",
+      icon: "🌱",
+      category: "Energy"
+    },
+    {
+      text: "Smart city initiatives in Pakistan",
+      icon: "🏙️",
+      category: "Urban"
+    },
+    {
+      text: "Digital transformation roadmap for government",
+      icon: "🏛️",
+      category: "Governance"
+    }
+  ];
+
+  const handleSuggestionClick = (suggestion: string) => {
+    safeSetInput(suggestion);
+    // Focus the input
+    const inputElement = document.querySelector('input[type="text"]') as HTMLInputElement;
+    if (inputElement) {
+      inputElement.focus();
+    }
+  };
+
   return (
     <div className="flex flex-col lg:flex-row h-full w-full relative">
       {/* Mobile Menu Button - Fixed bottom right */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="lg:hidden fixed bottom-24 right-4 z-[60] p-4 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 backdrop-blur-xl rounded-full text-white shadow-lg shadow-emerald-500/20 ring-1 ring-white/20 transition-all"
+        className="lg:hidden fixed bottom-[88px] right-4 z-[60] p-3 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 backdrop-blur-xl rounded-full text-white shadow-lg shadow-emerald-500/20 ring-1 ring-white/20 transition-all"
       >
-        <MessageCircle className="w-6 h-6" />
+        <MessageCircle className="w-5 h-5" />
       </button>
 
       {/* Mobile Bottom Sheet */}
@@ -864,22 +907,55 @@ const Chat = ({
                   <span className="bg-gradient-to-r from-emerald-400 to-emerald-200 bg-clip-text text-transparent">السَّلامُ عَلَيْكُم</span> 👋
                 </p>
                 <p className="text-base sm:text-lg mb-6">How may I assist you today?</p>
-                <div className="max-w-sm mx-auto text-sm bg-black/20 backdrop-blur-lg rounded-2xl p-4 shadow-xl ring-1 ring-white/10 hover:ring-white/20 transition-all">
-                  <p className="mb-2 text-emerald-400 font-medium">You can:</p>
-                  <ul className="space-y-2 text-white/80">
-                    <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-gradient-to-r from-emerald-400 to-emerald-300 rounded-full"></span>
-                      Ask questions in English or Urdu
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-gradient-to-r from-emerald-400 to-emerald-300 rounded-full"></span>
-                      Upload documents for analysis
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-gradient-to-r from-emerald-400 to-emerald-300 rounded-full"></span>
-                      Search for latest information
-                    </li>
-                  </ul>
+                <div className="max-w-2xl mx-auto">
+                  <div className="text-sm bg-black/20 backdrop-blur-lg rounded-2xl p-4 shadow-xl ring-1 ring-white/10 hover:ring-white/20 transition-all mb-6">
+                    <p className="mb-2 text-emerald-400 font-medium">You can:</p>
+                    <ul className="space-y-2 text-white/80">
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-gradient-to-r from-emerald-400 to-emerald-300 rounded-full"></span>
+                        Ask questions in English or Urdu
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-gradient-to-r from-emerald-400 to-emerald-300 rounded-full"></span>
+                        Upload documents for analysis
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-gradient-to-r from-emerald-400 to-emerald-300 rounded-full"></span>
+                        Search for latest information
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* Chat Suggestions */}
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-medium text-white/70">Try asking about:</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-w-3xl mx-auto px-1">
+                      {chatSuggestions.map((suggestion, index) => (
+                        <motion.button
+                          key={index}
+                          onClick={() => handleSuggestionClick(suggestion.text)}
+                          className="group flex items-start gap-3 p-3 bg-black/20 hover:bg-black/30 active:bg-black/40 backdrop-blur-sm rounded-xl ring-1 ring-white/10 hover:ring-emerald-500/30 transition-all text-left"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <span className="text-xl group-hover:scale-110 transition-transform">
+                            {suggestion.icon}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-white/90 group-hover:text-white transition-colors line-clamp-2">
+                              {suggestion.text}
+                            </p>
+                            <span className="text-xs text-emerald-400/70 group-hover:text-emerald-400 transition-colors">
+                              {suggestion.category}
+                            </span>
+                          </div>
+                        </motion.button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -944,7 +1020,7 @@ const Chat = ({
 
         {/* Input Container */}
         <div className="w-full bg-gradient-to-t from-black/80 to-black/40 backdrop-blur-xl border-t border-white/10">
-          <div className="px-4 py-4 lg:py-6 pb-safe-or-6 mb-16 lg:mb-0">
+          <div className="px-4 py-4 lg:py-6 pb-safe-or-6 mb-20 lg:mb-0">
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
               <div className="flex items-center gap-2">
                 <div className="flex gap-1.5">
